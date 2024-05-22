@@ -52,6 +52,9 @@ export class SalairesPage implements OnInit {
   selected_H: any;
   users: any;
   toggle= true;
+  idBoutiquePaie: number ;
+  idMethodePaie: number ;
+
   @ViewChild('selectComponent') selectComponent: IonicSelectableComponent;
   @ViewChild('selectComponent2') selectComponent2: IonicSelectableComponent;
 
@@ -92,9 +95,12 @@ export class SalairesPage implements OnInit {
 
   constructor(private router: Router,  private modalctrl: ModalController,private menu: MenuController,
     private http: HttpClient,private popupModalService: PopupModalService,private toastctrl: ToastController) {
-      this.loadEmploye();
+      this.idBoutiquePaie=0;
+      this.idMethodePaie=0;
+
+      /* this.loadEmploye();
       this.loadSalary();
-      this.loadHistorySalary();
+      this.loadHistorySalary(); */
       /* this.loadInfoMensuel(); */
       if(this.listeSalaire){
         this.id=this.listeSalaire.IdEmploye;
@@ -114,8 +120,10 @@ export class SalairesPage implements OnInit {
       }
       }
   ngOnInit() {
+    console.log('Chargement des données...');
     this.loadEmploye();
     this.loadSalary();
+    this.loadHistorySalary();
 
   }
 
@@ -688,12 +696,38 @@ export class SalairesPage implements OnInit {
     toast.present();
   }
 
+  //Effectue le paiement avec l'API de la plate-forme de gestion KSSV
+
+  payerSalaire(detailSalaireH: any){
+    const detailSalaire = detailSalaireH.BULLETIN_SALAIRE;
+    const libelle='SALAIRE '+this.periode+': ' + this.selected.Prenom + ' ' + this.selected.Nom ;
+    let montant = detailSalaire.SALAIRE_NET;
+    if(montant <=0){
+      montant=0;
+      return;
+    }
+    console.log('Infos DetailSalaire: ',detailSalaire);
+    
+    const param = '&IDBOUTIQUE='+this.idBoutiquePaie+'&IDEMPLOYE='+detailSalaire.IDEMPLOYE+'&LIBELLE='+libelle+'&MONTANT='+montant+'&ID_MODEPAIE='+this.idMethodePaie ;
+    this.readAPI(environment.endPoint+'salaire_action.php?Action=PAIEMENT_SALAIRE&'+param+'&Token='+environment.tokenUser)
+    .subscribe((reponse: any) =>{
+      console.log(reponse);
+      if(reponse.OK>0){
+        this.loadSalary();
+        this.presentToast('Paiement effectué.');
+        const transaction = reponse.Contenue;
+        this.pdfRecu(transaction);
+      }else{
+        this.presentToast('ERREUR: '+reponse.TxErreur);
+      }
+    });
+    
+  }
+
   // Reçu paiement Salaire**
-  pdfRecu(){
-
-
+  pdfRecu(infoTransaction: any){
     const docDef = {
-      watermark: { text: 'Ionic THIERNO', color: 'blue', opacity: 0.2, bold: true},
+      watermark: { text: 'NAbySy-RH', color: 'blue', opacity: 0.1, bold: false},
       // a string or { width: number, height: number }
       pageSize: 'A4',
 
@@ -712,11 +746,11 @@ export class SalairesPage implements OnInit {
           ]
         },
         {text: 'Reçu', style: 'header',alignment: 'center'},
-        {text: 'Reçu de Thierno Abdourahmane Niang A '+this.prenom+' '+this.nom,margin: [ 0, 10, 0, 10 ] },
+        {text: 'Reçu de '+this.prenom+' '+this.nom,margin: [ 0, 10, 0, 10 ] },
         'Je, soussigné(e) '+this.prenom+' '+this.nom+', reconnais avoir reçu la somme de  '
-        +this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_NET+' FCFA. Cette somme a été reçu pour le mois de: '+ this.periode,
-        {text: 'Le paiement a été fait par______________.( espèce, chèque…). ',margin: [ 0, 20, 5, 10 ] },
-        'Ce reçu confirme que le paiement a bien été fait.',
+        +this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_NET+' FCFA. Cette somme a été reçu pour le solde du mois de: '+ this.periode,
+        {text: 'Le paiement a été fait par__________________________.( espèce, chèque…). ',margin: [ 0, 20, 5, 10 ] },
+        'Ce reçu confirme que le paiement a bien été effectuée.',
         {text: 'Signature',margin: [ 0, 500, 0, 0 ],alignment: 'right' }
 
       ],

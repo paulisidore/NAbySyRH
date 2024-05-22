@@ -124,7 +124,7 @@
                       <p><ion-text color="dark" style="font-weight: bold;">{{this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_NET+'  FCFA'}} </ion-text></p>
                     </ion-label>
                   </ion-item>
-                  <ion-button expand="block" (click)="pdfRecu()">Payer salaire</ion-button>
+                  <ion-button expand="block" (click)="payerSalaire(this.listeSalaire)">Payer salaire</ion-button>
                 </div>
               </ion-col>
               <ion-col size="12" size-sm="6" size-md="4" size-lg="4" size-xl="4" class="ion-justify-content-center"*ngIf="selected" style="margin-top: 0;">
