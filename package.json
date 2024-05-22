@@ -1,8 +1,8 @@
 {
-  "name": "nabysy-final",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "name": "nabysy-rh",
+  "version": "1.0.0",
+  "author": "PAUL & AICHA MACHINERIE sarl",
+  "homepage": "https://groupe-pam.net/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
