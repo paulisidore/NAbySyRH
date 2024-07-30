@@ -9,7 +9,6 @@ import { DetailEmployePage } from '../DETAIL/detail-employe/detail-employe.page'
 import { PhotoService } from 'src/app/services/photo.service';
 import { PhotoviewerPage } from '../DETAIL/photoviewer/photoviewer.page';
 // **************************
-import { PrintBulletin2Page } from '../pages/print-bulletin2/print-bulletin2.page';
 import { AvancePage } from '../CRUD/avance/avance.page';
 import { DetailSalairePage } from '../DETAIL/detail-salaire/detail-salaire.page';
 import { DetailPrimePage } from '../DETAIL/detail-prime/detail-prime.page';
