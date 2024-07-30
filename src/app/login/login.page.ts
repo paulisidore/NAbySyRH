@@ -45,7 +45,7 @@ export class LoginPage implements OnInit {
         }
         if(params.enc_pwd){
           let dPwd=window.atob(params.enc_pwd);
-          console.log("Pwd recus: ", dPwd);
+          //console.log("Pwd recus: ", dPwd);
           environment.passWord=dPwd;
           this.password=dPwd ;
         }
