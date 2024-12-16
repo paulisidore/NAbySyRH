@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 import { NabysyGlobalServiceService } from '../services/nabysy-global-service.service';
@@ -16,8 +16,8 @@ import { UserInfosServiceService } from '../user-infos-service.service';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
-  username: '';
-  password: '';
+  username: string = '';
+  password: string = '';
   IdEmploye: '';
 
 
@@ -30,11 +30,37 @@ export class LoginPage implements OnInit {
     private navctrl: NavController,
     private infosUserSrv: UserInfosServiceService,
     private nabysyGSrv: NabysyGlobalServiceService,
+    private route: ActivatedRoute,
   ) {
     environment.appInfo={ID:1,Nom:'Paul & Aïcha Machinerie',Adresse:'Dakar',IdResponsable:0,Tel:'+221 33 836 14 77',Email:'',Contact:''} ;
     //console.log(environment.appInfo);
+    this.route.queryParams.subscribe(
+      params =>{
+        console.log("Parametre distant recus: ", params);
+        if(params.enc_user){
+          let dUser=window.atob(params.enc_user);
+          console.log("User recus: ", dUser);
+          environment.userName=dUser;
+          this.username=dUser;
+        }
+        if(params.enc_pwd){
+          let dPwd=window.atob(params.enc_pwd);
+          //console.log("Pwd recus: ", dPwd);
+          environment.passWord=dPwd;
+          this.password=dPwd ;
+        }
+
+      }
+    )
     console.log('Chargement des données...');
-    nabysyGSrv.loadAppInfosFromAPI();
+    nabysyGSrv.loadAppInfosFromAPI().then(
+      ()=>{
+        if(environment.userName !=='' && environment.passWord !==""){
+          console.log('Auto-Login...');
+          this.proseslogin();
+        }
+      }
+    );
    }
 
   ngOnInit() {
