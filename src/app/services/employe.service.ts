@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { LoadingService } from './loading.service';
+import { of, tap } from 'rxjs';
 
 export interface Employe {
   id: string;
@@ -19,6 +20,7 @@ export interface Employe {
   providedIn: 'root'
 })
 export class EmployeService {
+  private employes: any[] = [];
   private url= environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+environment.tokenUser;
   private urlDelete;
 
@@ -56,5 +58,17 @@ export class EmployeService {
   getService(id: ''){
     this.url= environment.endPoint+'service_action.php?Action=GET_SERVICE&IdService='+id+'&Token='+environment.tokenUser;
     return this.http.get(this.url);
+  }
+
+  getEmployes() {
+    if (this.employes.length === 0) {
+      return this.http.get(environment.endPoint + 'employe_action.php?Action=GET_EMPLOYE&Token=' + localStorage.getItem('nabysy_token'))
+        .pipe(
+          tap((data: any) => {
+            this.employes = data;
+          })
+        );
+    }
+    return of(this.employes); // Si déjà chargé, retournez les données
   }
 }

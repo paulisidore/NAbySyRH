@@ -67,6 +67,7 @@ export class AppComponent {
       this.photoUrl=environment.employeConnecte.PHOTO_URL ;
       this.employeFonction=environment.employeConnecte.Fonction ;
       this.userInfo=environment.employeConnecte ;
+      localStorage.removeItem('nabysy_token');
     }
     this.menu.close('menu-content');
   }
