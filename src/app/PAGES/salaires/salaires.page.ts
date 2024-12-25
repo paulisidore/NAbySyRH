@@ -139,7 +139,7 @@ export class SalairesPage implements OnInit {
     }
 
   loadEmploye(){
-    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       console.log(listes);
       this.listeEmploye=listes ;
@@ -154,7 +154,7 @@ export class SalairesPage implements OnInit {
       txEmploye='&IDEMPLOYE='+this.id;
     }
     this.readAPI(environment.endPoint+'salaire_action.php?Action=GET_BULLETIN'+txEmploye+
-    '&ANNEE='+this.selectedDate+'&MOIS='+this.selectedMonth+'&Token='+environment.tokenUser)
+    '&ANNEE='+this.selectedDate+'&MOIS='+this.selectedMonth+'&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       console.log(listes);
       //  this.dt1=Listes['0'];
@@ -176,11 +176,11 @@ export class SalairesPage implements OnInit {
           this.entreprise= this.listeSalaire.BULLETIN_SALAIRE.NOM_ENTREPRISE;this.adressEntr= this.listeSalaire.BULLETIN_SALAIRE.ADR_ENTREPRISE;
           this.contactEntre= this.listeSalaire.BULLETIN_SALAIRE.CONTACT_ENTREPRISE;this.emailEntre= this.listeSalaire.BULLETIN_SALAIRE.EMAIL_ENTREPRISE;
           this.phoneEntre= this.listeSalaire.BULLETIN_SALAIRE.TEL_ENTREPRISE;this.prenom= this.listeSalaire.BULLETIN_SALAIRE.PRENOMEMPLOYE;
-  
+
       }
       console.log(this.listeSalaire.BULLETIN_SALAIRE.LIGNE_GAIN_PRIME);
     });
-    
+
   }
 
   loadHistorySalary(){
@@ -189,7 +189,7 @@ export class SalairesPage implements OnInit {
       txEmploye='&IDEMPLOYE='+this.id_H;
     }
     this.readAPI(environment.endPoint+'salaire_action.php?Action=GET_SALAIRE'+txEmploye+
-    '&DATEDEBUT='+this.selectedDate2+'&DATEFIN='+this.selectedDate3+'&Token='+environment.tokenUser)
+    '&DATEDEBUT='+this.selectedDate2+'&DATEFIN='+this.selectedDate3+'&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       console.log(listes);
       this.historySalaire=listes ;
@@ -198,7 +198,7 @@ export class SalairesPage implements OnInit {
   }
 
   loadInfoMensuel(){
-    this.readAPI(environment.endPoint+'salaire_action.php?Action=GET_INFOS_MENSUEL&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'salaire_action.php?Action=GET_INFOS_MENSUEL&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       console.log(listes);
       //  this.dt1=Listes['0'];
@@ -707,9 +707,9 @@ export class SalairesPage implements OnInit {
       return;
     }
     console.log('Infos DetailSalaire: ',detailSalaire);
-    
+
     const param = '&IDBOUTIQUE='+this.idBoutiquePaie+'&IDEMPLOYE='+detailSalaire.IDEMPLOYE+'&LIBELLE='+libelle+'&MONTANT='+montant+'&ID_MODEPAIE='+this.idMethodePaie ;
-    this.readAPI(environment.endPoint+'salaire_action.php?Action=PAIEMENT_SALAIRE&'+param+'&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'salaire_action.php?Action=PAIEMENT_SALAIRE&'+param+'&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((reponse: any) =>{
       console.log(reponse);
       if(reponse.OK>0){
@@ -721,7 +721,7 @@ export class SalairesPage implements OnInit {
         this.presentToast('ERREUR: '+reponse.TxErreur);
       }
     });
-    
+
   }
 
   // Reçu paiement Salaire**

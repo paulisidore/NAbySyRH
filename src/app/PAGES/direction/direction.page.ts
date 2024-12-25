@@ -37,7 +37,8 @@ export class DirectionPage implements OnInit {
   // &IDDirectionParent=0
   refreshDirection(){
     this.loadingService.presentLoading();
-    this.readAPI(environment.endPoint+'direction_action.php?Action=GET_DIRECTION&IdDirectionParent=0&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'direction_action.php?Action=GET_DIRECTION&IdDirectionParent=0&Token='+
+      localStorage.getItem('nabysy_token'))
     .subscribe((Listes) =>{
       console.log(Listes);
       //  this.dt1=Listes['0'];
@@ -62,7 +63,8 @@ export class DirectionPage implements OnInit {
   ];
 
   getDirection(id: ''){
-    this.url= environment.endPoint+'direction_action.php?Action=GET_DIRECTION&IdDirection='+id+'&Token='+environment.tokenUser;
+    this.url= environment.endPoint+'direction_action.php?Action=GET_DIRECTION&IdDirection='+id+'&Token='+
+    localStorage.getItem('nabysy_token');
     return this.http.get(this.url);
   }
 
@@ -111,7 +113,7 @@ export class DirectionPage implements OnInit {
             headers.append("Accept", 'application/json');
             headers.append('Content-Type', 'application/json' );
             var apiUrl=environment.endPoint+'direction_action.php?Action=SUPPRIME_DIRECTION&IdDirection='+direction.ID+
-            '&Token='+environment.tokenUser;
+            '&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);

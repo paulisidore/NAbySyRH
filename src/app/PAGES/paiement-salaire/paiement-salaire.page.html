@@ -1,0 +1,210 @@
+<div class="stats-container" style="height:100%; width:100%;">
+  <h1>CRITERE DE RECHERCHE</h1>
+  <ion-row style="border: 1px solid #000; margin-top: 10px;">
+    <ion-col size="4" style="border: 0; border-right: 1px solid #000;">
+      <!-- Date de départ -->
+      <!-- <ion-title class="depart">Date de départ <br><ion-icon name="arrow-down-outline" ></ion-icon></ion-title> -->
+      <ion-item id="open-modal2">
+        <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+        <ion-label>Date de départ</ion-label>
+        <ion-text tappable slot="end">{{ formattedString2| date: 'dd MMMM YYYY' }}</ion-text>
+        <ion-icon icon="calendar-outline" slot="end" color="primary" tappable></ion-icon>
+      </ion-item>
+
+      <ion-modal trigger="open-modal2" mode="md">
+        <ng-template>
+          <ion-content>
+            <ion-datetime
+              #datetime
+              [value]="dateValue2" size="cover"
+              (ionChange)="dateChangedHistory(datetime.value)"
+              (ionCancel)="showPicker=false;">
+            </ion-datetime >
+              <ion-row style="border: 0;">
+                <ion-col size="4" style="border: 0;"><ion-button (click)="close_H()" color="danger" class="dismiss">Fermer</ion-button></ion-col>
+                <ion-col size="4" style="border: 0;"><ion-button (click)="effacedateDebut()" color="warning" class="dismiss">Effacer</ion-button></ion-col>
+                <ion-col size="4" style="border: 0;"><ion-button (click)="select_H()" color="primary" expand="full">Choisir</ion-button></ion-col>
+              </ion-row>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-col>
+    <ion-col size="4" style="border: 0; border-right: 1px solid #000;">
+      <!-- Date de fin -->
+      <ion-item id="open-modal3">
+        <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+        <ion-label>Date de Fin </ion-label>
+        <ion-text tappable slot="end">{{ formattedString3 }}</ion-text>
+        <ion-icon icon="calendar-outline" slot="end" color="primary" tappable></ion-icon>
+      </ion-item>
+
+      <ion-modal trigger="open-modal3" mode="md">
+        <ng-template>
+          <ion-content>
+            <ion-datetime
+              #datetime
+              [value]="dateValue3" size="cover"
+              (ionChange)="dateChangedHistoryEnd(datetime.value)"
+              (ionCancel)="showPicker=false;">
+            </ion-datetime >
+              <ion-row style="border: 0;">
+                <ion-col size="4" style="border: 0;"><ion-button (click)="close_H()" color="danger" class="dismiss">Fermer</ion-button></ion-col>
+                <ion-col size="4" style="border: 0;"><ion-button (click)="effacedateFin()" color="warning" class="dismiss">Effacer</ion-button></ion-col>
+                <ion-col size="4" style="border: 0;"><ion-button (click)="select_H()" color="primary" expand="full">Choisir</ion-button></ion-col>
+              </ion-row>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+    </ion-col>
+    <ion-col size="4" style="border: 0;">
+      <!-- Select Employe -->
+        <ion-item>
+          <ion-label>Selectionnez un employe</ion-label>
+
+          <ionic-selectable #selectComponent2 [(ngModel)]="selected_H" itemValueField="ID"
+          itemTextField="Prenom" [items]="users" headerColor="primary" [canSearch]="true"
+          searchFailText=" Rien n'a été trouvé:("  [canClear]="true"
+          >
+          <!-- ****************************** -->
+          <ng-template ionicSelectableCloseButtonTemplate color="danger">
+            <ion-button fill="clear" color="danger">
+              <ion-icon  name="close-circle"></ion-icon>
+            </ion-button>
+
+          </ng-template>
+
+          <ng-template ionicSelectableItemTemplate let-user="item">
+            {{user.Prenom +' '+ user.Nom +'   ====> '+user.Fonction+' ===>Matricule: '+user.ID }}
+          </ng-template>
+          <!-- ******************************** -->
+          <ng-template ionicSelectableFooterTemplate>
+            <ion-toolbar>
+              <ion-row>
+                <ion-col size="4">
+                  <ion-button expand="full" (click)="clear_H()">
+                    Annuler
+                  </ion-button>
+                </ion-col >
+                <ion-col  size="4">
+                  <ion-button expand="full" (click)="toggleItems_H()" [disabled]="!selectComponent2.itemsToConfirm.length">
+                    Décocher
+                  </ion-button>
+                </ion-col>
+                <ion-col size="4">
+                  <ion-button expand="full" (click)="confirm_H()" [disabled]="!selectComponent2.itemsToConfirm.length">
+                    Confirmer
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+            </ion-toolbar>
+          </ng-template>
+        </ionic-selectable>
+        </ion-item>
+    </ion-col>
+  </ion-row>
+  <ion-button (click)="loadHistorySalary()"  shape="round" color="success" style="width: 300px;" >Rechercher</ion-button>
+
+  <ion-card *ngFor="let item of historySalaire " class="ion-margin" style="border: 0px #fff; ">
+    <ion-card-header>
+      <ion-card-subtitle >
+        <strong>{{item.DatePaie}}</strong>
+      </ion-card-subtitle>
+      <ion-item >
+        <!-- <ion-label>{{item.Prenom}}</ion-label> -->
+        <ion-label >
+          <ion-text style="background-color: orange;">Montant Versé: {{item.TotalVers}}</ion-text></ion-label>
+        <ion-label slot="end" >{{item.Prenom+' '+item.Nom}}</ion-label>
+       <!--  <ion-icon [style.color]="item.DateEnreg === today ? 'red' :(item.DateEnreg === yesterdayToString ?'orange': 'green')"
+        size="small" name="ellipse" slot="end"></ion-icon> -->
+        <ion-icon color="danger"
+        size="small" name="ellipse" slot="end"></ion-icon>
+
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content style="border: 0px #fff; ">
+      <!-- <ion-label>Due {{item.heureEnreg | date:'fullDate'}}</ion-label> -->
+      <ion-accordion-group expand="">
+          <ion-accordion value="infos">
+          <ion-item slot="header">
+            <!-- <ion-label>Date {{item.DateEnreg | date:'fullDate' }}</ion-label> -->
+            <!-- <ion-label>Enregistrée le  {{item.DateEnreg | date:'fullDate'}} {{'à '+item.HeureEnreg}}</ion-label> -->
+            <!-- <ion-label>Enregistrée  {{item.DateEnreg===today ?"Aujourd\'hui" : (item.DateEnreg=== '2022/09/01' ? 'Hier': 'le '+item.DateEnreg | date:'fullDate')}} {{'à '+item.HeureEnreg}}</ion-label> -->
+            <ion-label slot="end">N°  {{item.ID }}</ion-label>
+
+          </ion-item>
+          <ion-list slot="content">
+            <ion-row >
+              <ion-col size="12" size-sm="6" size-md="6" size-lg="6" size-xl="6"style="border: 1px solid #000;">
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">Nom:</ion-text></p>{{item.Nom}}</ion-label>
+                </ion-item>
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">Prénom:</ion-text> </p>{{item.Prenom}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Sexe:</ion-text></p>{{item.Sexe}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Situation_Famille:</ion-text></p>{{item.Situation_Famille}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Date de Paie:</ion-text></p>{{item.DatePaie}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Heure de Paie:</ion-text></p>{{item.HeurePaie}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Fonction:</ion-text></p>{{item.Fonction}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Mode de Paiement:</ion-text></p>{{item.TextModePaiement}}</ion-label>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6" size-md="6" size-lg="6" size-xl="6" style="border: 1px solid #000;">
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">Matricule:</ion-text></p>{{item.IdEmploye}}</ion-label>
+                </ion-item>
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">Mois:</ion-text></p>{{'Mois: '+item.IdMois | date:'MMMM'}}</ion-label>
+                </ion-item>
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">A reçu une avance:</ion-text></p>{{item.IsAvance=== '1' ? "OUI" : "NON"}}
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Annee:</ion-text></p>{{item.Annee}}</ion-label>
+                </ion-item>
+                <ion-item >
+                  <ion-label><p><ion-text color="dark">Mode de Paiement:</ion-text></p>{{item.ModePaiement}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Total Avance Précédente:</ion-text></p>{{item.TotalAvancePrec}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Total Avance Suivante:</ion-text></p>{{item.TotalAvanceSuiv}}</ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label><p><ion-text color="dark">Total Versé:</ion-text> </p>{{item.TotalVers}}</ion-label>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-list>
+        </ion-accordion>
+      </ion-accordion-group>
+    </ion-card-content>
+
+    <ion-row style="border: 0; ">
+      <ion-item>
+        <ion-button size="small" (click)="salairedetails(item)" color="dark" fill="clear">
+        <ion-icon name="eye-outline" slot="start"></ion-icon>
+        <p>Voir</p>
+      </ion-button>
+
+      </ion-item>
+
+    </ion-row>
+
+
+  </ion-card>
+
+</div>

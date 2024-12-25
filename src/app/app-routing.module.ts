@@ -120,7 +120,8 @@ const routes: Routes = [
   {
     path: 'detail-salaire',
     loadChildren: () => import('./DETAIL/detail-salaire/detail-salaire.module').then( m => m.DetailSalairePageModule)
-  },  {
+  },
+  {
     path: 'contrat',
     loadChildren: () => import('./DETAIL/contrat/contrat.module').then( m => m.ContratPageModule)
   },
@@ -147,6 +148,10 @@ const routes: Routes = [
   {
     path: 'niveau-acces',
     loadChildren: () => import('./CRUD/niveau-acces/niveau-acces.module').then( m => m.NiveauAccesPageModule)
+  },
+  {
+    path: 'paiement-salaire',
+    loadChildren: () => import('./PAGES/paiement-salaire/paiement-salaire.module').then( m => m.PaiementSalairePageModule)
   },
 
 

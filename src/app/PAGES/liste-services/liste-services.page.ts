@@ -78,7 +78,8 @@ export class ListeServicesPage implements OnInit {
       console.log(res);
       this.direction=res;
       this.id=this.direction.ID;
-      this.url=environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&IdDirection='+this.id+'&Token='+environment.tokenUser;
+      this.url=environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&IdDirection='+this.id+'&Token='+
+      localStorage.getItem('nabysy_token');
 
       this.readAPI(this.url)
       .subscribe((data) =>{
@@ -159,7 +160,7 @@ export class ListeServicesPage implements OnInit {
     this.menu.open('menu-content');
   }
   getService(id: ''){
-    this.url= environment.endPoint+'service_action.php?Action=GET_SERVICE&IdService='+id+'&Token='+environment.tokenUser;
+    this.url= environment.endPoint+'service_action.php?Action=GET_SERVICE&IdService='+id+'&Token='+localStorage.getItem('nabysy_token');
     return this.http.get(this.url);
   }
 
@@ -222,7 +223,7 @@ export class ListeServicesPage implements OnInit {
             headers.append('Accept', 'application/json');
             headers.append('Content-Type', 'application/json' );
             const apiUrl=environment.endPoint+'service_action.php?Action=SUPPRIME_SERVICE&IdService='+serviceInfo.ID+
-            '&Token='+environment.tokenUser;
+            '&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);
@@ -384,7 +385,7 @@ export class ListeServicesPage implements OnInit {
             headers.append('Accept', 'application/json');
             headers.append('Content-Type', 'application/json' );
             const apiUrl=environment.endPoint+'employe_action.php?Action=SAVE_EMPLOYE&IdEmploye='+
-            employe.ID+'&IdDirection=0&IdService=0&Token='+environment.tokenUser;
+            employe.ID+'&IdDirection=0&IdService=0&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);

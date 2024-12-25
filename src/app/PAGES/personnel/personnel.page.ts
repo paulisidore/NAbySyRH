@@ -65,7 +65,7 @@ export class PersonnelPage implements OnInit {
   //load API
   refreshPerson(){
     this.loadingService.presentLoading();
-    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       this.loadingService.dismiss();
       // console.log(Listes);
@@ -99,7 +99,7 @@ export class PersonnelPage implements OnInit {
             headers.append('Accept', 'application/json');
             headers.append('Content-Type', 'application/json' );
             const apiUrl=environment.endPoint+'employe_action.php?Action=SUPPRIME_EMPLOYE&IdEmploye='+
-            employe.ID+'&Token='+environment.tokenUser;
+            employe.ID+'&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);
