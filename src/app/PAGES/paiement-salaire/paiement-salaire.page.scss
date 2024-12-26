@@ -1,24 +1,52 @@
-/* app.component.css */
-ion-header {
-  --background: #3880ff;
-  --color: #fff;
-}
 
-ion-content {
-  padding: 16px;
-}
+ion-content{
 
-form {
-  margin-bottom: 20px;
-}
 
-ion-item {
-  --background: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}
+  div {
+  /*   height: 85vh;
+    padding-top: 250px; */
+    margin-bottom: 3%;
+    &#div1{
+      ion-grid{
+        ion-row{
+          ion-col{
+            &#col1{
+              border: 2px solid #3880ff;
+              .recherche{
+                margin-bottom: 20px;
+                text-align: center;
+                text-decoration: underline solid;
+                font-weight: bolder;
+              }
+              &.depart{
+                text-align: center;
+                font-weight: 50;
+              }
+            }
+          }
+        }
+      }
+    }
 
-ion-button {
-  margin-top: 10px;
-}
+
+  }
+  }
+
+  ion-datetime{
+    background: #fff;
+  }
+  .dismiss{
+    margin-right: 400px;
+  }
+  .ion-grid-user{
+    --ion--grid--padding-sm: 20px;
+    --ion--grid--padding-md: 30px;
+    --ion--grid--padding-lg: 40px;
+    --ion--grid--padding-xl: 10 0px;
+  }
+  .ion-row-user{
+    border: 0;
+    ion-col{
+      border: 0;
+    }
+  }

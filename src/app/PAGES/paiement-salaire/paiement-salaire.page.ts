@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable @typescript-eslint/member-ordering */
+/* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable prefer-const */
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  IonDatetime,
-  MenuController,
-  ModalController,
-  ToastController,
-} from '@ionic/angular';
+import { AlertController, IonDatetime, MenuController, ModalController } from '@ionic/angular';
+import { EmployeService } from 'src/app/services/employe.service';
+import { LoadingService } from 'src/app/services/loading.service';
 import { PopupModalService } from 'src/app/services/popup-modal.service';
 import { environment } from 'src/environments/environment';
 import { format, parseISO } from 'date-fns';
 import { IonicSelectableComponent } from 'ionic-selectable';
+import { CrudPrimePage } from 'src/app/CRUD/crud-prime/crud-prime.page';
 
 @Component({
   selector: 'app-paiement-salaire',
@@ -23,120 +19,261 @@ import { IonicSelectableComponent } from 'ionic-selectable';
   styleUrls: ['./paiement-salaire.page.scss'],
 })
 export class PaiementSalairePage implements OnInit {
-  historySalaire: any;
-  selected_H: any;
-  users: any;
-  id_H: number;
-
-  dateValue2 = format(new Date(), 'yyyy-MM-dd');
-  dateValue3 = format(new Date(), 'yyyy-MM-dd');
-  showPicker = false;
-  formattedString2 = '';
-  formattedString3 = format(new Date(), 'dd MMMM yyyy');
-
-  selectedDate2 = '';
-  selectedDate3 = format(new Date(), 'yyyy-MM-dd');
   @ViewChild(IonDatetime) datetime: IonDatetime;
-  @ViewChild('selectComponent2') selectComponent2: IonicSelectableComponent;
-  toggle = true;
+   @ViewChild('selectComponent') selectComponent: IonicSelectableComponent;
+   listePrime: any;
+   bulkEdit= false;
+   sortDirection= 0;
+   sortKey= null;
 
-  constructor(
-    private router: Router,
-    private modalctrl: ModalController,
-    private menu: MenuController,
-    private http: HttpClient,
-    private popupModalService: PopupModalService,
-    private toastctrl: ToastController
-  ) {}
-  ngOnInit(): void {
-    throw new Error('Method not implemented.');
-  }
+   // Employe
+   selected_user= null;
+   selected: any;
+   users: any;
+   listeEmploye: any;
+   toggle= true;
+   id: number;
 
-  salairedetails(salaire: any) {
-    this.popupModalService.presentModalsalaire(salaire);
-  }
 
-  loadHistorySalary() {
-    let txEmploye = '';
-    if (this.id_H > 0) {
-      txEmploye = '&IDEMPLOYE=' + this.id_H;
-    }
-    this.readAPI(
-      environment.endPoint +
-        'salaire_action.php?Action=GET_SALAIRE' +
-        txEmploye +
-        '&DATEDEBUT=' +
-        this.selectedDate2 +
-        '&DATEFIN=' +
-        this.selectedDate3 +
-        '&Token=' +
-        localStorage.getItem('nabysy_token')
-    ).subscribe((listes) => {
-      console.log(listes);
-      this.historySalaire = listes;
-    });
-  }
-  readAPI(url: string) {
-    console.log(url);
-    return this.http.get(url);
-  }
 
-  // Historique salaire
-  dateChangedHistory(value) {
-    this.dateValue2 = value;
-    this.formattedString2 = format(parseISO(value), 'dd MMMM yyyy');
-    console.log(format(parseISO(value), 'yyyy-MM-dd'));
-    this.showPicker = false;
-    //  this.selectedDate=value;
-    this.selectedDate2 = value;
-  }
-  dateChangedHistoryEnd(value) {
-    this.dateValue3 = value;
-    this.formattedString3 = format(parseISO(value), 'dd MMMM yyyy');
-    console.log(format(parseISO(value), 'yyyy-MM-dd'));
-    this.showPicker = false;
-    //  this.selectedDate=value;
-    this.selectedDate3 = value;
-  }
-  effacedateDebut() {
-    this.datetime.cancel(true);
-    this.selectedDate2 = '';
-    this.formattedString2 = '';
-    this.loadHistorySalary();
-  }
-  effacedateFin() {
-    this.datetime.cancel(true);
-    this.selectedDate3 = '';
-    this.formattedString3 = '';
-    this.loadHistorySalary();
-  }
-  close_H() {
-    this.datetime.cancel(true);
-    this.loadHistorySalary();
-  }
-  select_H() {
-    this.datetime.confirm(true);
-    this.loadHistorySalary();
-  }
+   // Pick Date
+    today: any;
+  /* age =0; */
+   selectedDate= '';
+   selectedDate2= format(new Date(),'yyyy-MM-dd');
+   modes = ['date', 'month', 'month-year','year'];
+   selectedMode= 'date';
+   showPicker = false;
+   dateValue= format(new Date(),'yyyy-MM-dd');
+   dateValue2= format(new Date(),'yyyy-MM-dd');
+   formattedString= '';
+   formattedString2= '';
 
-  // Select employe
-  clear_H() {
-    this.selectComponent2.clear();
-    this.selectComponent2.close();
-    this.id_H === 0;
-  }
-  toggleItems_H() {
-    this.selectComponent2.toggleItems(this.toggle);
-    this.toggle = !this.toggle;
-    this.id_H === 0;
-  }
-  confirm_H() {
-    this.selectComponent2.confirm();
-    this.selectComponent2.close();
-    console.log(this.selected_H);
-    if (this.selected_H) {
-      this.id_H = this.selected_H.ID;
-    }
-    this.loadHistorySalary();
-  }
+
+   constructor(private http: HttpClient,private router: Router,private popupModalService: PopupModalService,
+     private menu: MenuController, private modalctrl: ModalController,  private service: EmployeService,
+     private alertctrl: AlertController,
+     private loadingService: LoadingService) {
+       // this.confirm();
+       this.setToday();
+       this.today = new Date().getDate();
+       this.loadEmploye();
+       this.loadPrime();
+
+   }
+
+   ngOnInit() {
+
+   }
+
+   setToday(){
+     // this.formattedString= format(parseISO(format(new Date(), 'yyyy-MM-dd')+ 'T09:00:00.000Z'), 'HH:mm, MMM d, yyyy');
+     // this.formattedString= format(parseISO(format(new Date(), 'yyyy-MM-dd')+ 'T09:00:00.000Z'), ' yyyy-MM-d ');
+     this.formattedString2= format(parseISO(format(new Date(), 'yyyy-MM-dd')+ 'T09:00:00.000Z'), ' yyyy-MM-dd ');
+     }
+     dateChanged(value){
+       this.dateValue= value;
+      this.formattedString= value;
+      this.showPicker= false;
+      this.selectedDate=value;
+      }
+      dateChangedFin(value){
+       this.dateValue2= value;
+      this.formattedString2=value ;
+      this.showPicker= false;
+      this.selectedDate2=value;
+      }
+      close(){
+        this.datetime.cancel(true);
+       this.loadPrime();
+      }
+      select(){
+        this.datetime.confirm(true);
+       this.loadPrime();
+      }
+      effacedateDebut(){
+       this.datetime.cancel(true);
+       this.selectedDate= '';
+       this.formattedString= '';
+       this.loadPrime();
+     }
+     effacedateFin(){
+       this.datetime.cancel(true);
+       this.selectedDate2= '';
+       this.formattedString2= '';
+       this.loadPrime();
+     }
+   loadPrime(){
+     let IdEmploye='';
+     if(this.id){
+       IdEmploye ='&IDEMPLOYE='+this.id ;
+       console.log(IdEmploye);
+     }
+     this.loadingService.presentLoading();
+     this.readAPI(environment.endPoint+'performance_action.php?Action=GET_PERFORMANCE&ORDRE=TOTAL_PERFORMANCE&DATEDEPART='+
+     this.selectedDate+'&DATEFIN='+this.selectedDate2+IdEmploye+'&Token='+environment.tokenUser)
+     .subscribe((listes) =>{
+       this.loadingService.dismiss();
+       // console.log(Listes);
+       this.listePrime=listes ;
+       console.log(this.listePrime);
+     });
+     this.sort();
+
+   }
+   readAPI(url: string){
+     return this.http.get(url);
+
+   }
+   loadEmploye(){
+     this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+environment.tokenUser)
+     .subscribe((listes) =>{
+       // console.log(Listes);
+       this.listeEmploye=listes ;
+       this.users=listes;
+       /* this.users.ID=listes['"ID"'];
+           this.users.Nom=listes['"Nom"'];
+           this.users.Adresse=listes['"Adresse"'];
+           this.users.Telephone=listes['"Tel"']; */
+       console.log(this.listeEmploye);
+     });
+   }
+   addPrime(){
+     this.modalctrl.create({
+       component: CrudPrimePage
+     }).
+     then(modal =>{
+       modal.present();
+       return modal.onDidDismiss();
+     }).then(({data, role})=> {
+       console.log(data);
+       console.log(role);
+       if(role === 'create'){
+         const newPrime=data.Extra;
+         this.service.getPrime(newPrime).subscribe(async newdata =>{
+             this.listePrime.push(newdata[0]);
+             //console.log(this.listeEmploye);
+             this.loadPrime();
+         });
+       }
+     });
+     this.loadPrime();
+   }
+   removePrime(employe: any){
+     this.alertctrl.create({
+       header:'Suppresion',
+       message:'voulez vous supprimer ?',
+       buttons:[{
+         text:'oui',
+         handler:()=>new Promise (() =>{
+             const headers = new Headers();
+             headers.append('Accept', 'application/json');
+             headers.append('Content-Type', 'application/json' );
+             const apiUrl=environment.endPoint+'performance_action.php?Action=SUPPRIME_PERFORMANCE&IDPERFORMANCE='+
+             employe.ID+'&Token='+environment.tokenUser;
+             console.log(apiUrl);
+             this.http.get(apiUrl).subscribe(async data =>{
+               console.log(data);
+               if(data['OK']>0){
+                  //this.router.navigate(['personnel']);
+                  const pos=this.listePrime.indexOf(employe);
+                  console.log(pos);
+                  if (pos>-1){
+                   this.listePrime.splice(pos,1);
+                   // this.refreshPerson();
+                  }
+               }else{
+                 console.log(data['OK']);
+               }
+             });
+           })
+       },
+        {text:'No'}
+     ]
+     }).then(alertE1 =>alertE1.present()) ;
+
+
+
+   }
+
+   updatePrime(employe: any){
+     console.log(employe);
+     this.modalctrl.create({
+       component: CrudPrimePage,
+       componentProps:{ employe }
+     })
+     .then(modal => modal.present());
+     this.loadPrime();
+
+   }
+   _openSideNav(){
+     this.menu.enable(true,'menu-content');
+     this.menu.open('menu-content');
+   }
+   primedetails(userDetail: any){
+     this.popupModalService.presentModalPrime(userDetail);
+   }
+   doRefresh(event){
+      this.loadPrime();
+      this.loadEmploye();
+     event.target.complete();
+   }
+   removeVarious(){
+     this.bulkEdit=true;
+   }
+   save(){
+     this.bulkEdit=false;
+   }
+
+   sortBy(key){
+     this.sortKey= key;
+     this.sortDirection++;
+   }
+   sort(){
+     if (this.sortDirection === 1){
+       this.listePrime = this.listePrime.sort((a, b) =>{
+         console.log('a: ', a);
+         const valA = a[this.sortKey];
+         const valB = b[this.sortKey];
+         return valA.localeCompare(valB);
+       });
+     }else if (this.sortDirection === 2){
+       this.listePrime = this.listePrime.sort((a, b) =>{
+         const valA = a[this.sortKey];
+         const valB = b[this.sortKey];
+         return valB.localeCompare(valA);
+       });
+     }else{
+       this.sortDirection= 0;
+       this.sortKey= null;
+     }
+
+   }
+   openFromCode(){
+     this.selectComponent.open();
+   }
+   clear(){
+     this.selectComponent.clear();
+     this.selectComponent.close();
+     this.id=0;
+     console.log(this.id);
+     this.loadPrime();
+   }
+   toggleItems(){
+     this.selectComponent.toggleItems(this.toggle);
+     this.toggle= !this.toggle;
+
+   }
+   confirm(){
+     this.selectComponent.confirm();
+     this.selectComponent.close();
+     this.id=0;
+     console.log(this.selected);
+     if(this.selected){
+       this.id=this.selected.ID;
+
+     }
+     this.loadPrime();
+
+   }
 }
