@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Selectionnez des employés</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Annuler</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Barre de recherche pour filtrer les employés -->
+  <ion-searchbar
+    [(ngModel)]="searchText"
+    (ionInput)="filterUsers()"
+    debounce="300"
+    placeholder="Rechercher un employé..."
+  ></ion-searchbar>
+
+  <!-- Liste des employés avec checkboxes -->
+  <ion-list>
+    <ion-item *ngFor="let user of filteredUsers">
+      <ion-checkbox
+        slot="start"
+        [(ngModel)]="user.selected"
+        (ionChange)="updateSelection(user)"
+      ></ion-checkbox>
+      <ion-label>
+        {{ user.Prenom }} {{ user.Nom }} - {{ user.Fonction }} - {{ user.DIRECTION }}
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-footer>
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        <ion-button (click)="confirmSelection()">Confirmer</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-footer>
+</ion-content>

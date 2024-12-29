@@ -50,3 +50,30 @@ ion-content{
       border: 0;
     }
   }
+  .custom-table {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .table-header {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #ccc;
+  }
+  
+  .table-row {
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .table-row:hover {
+    background-color: #eaeaea;
+  }
+  
+  ion-col {
+    padding: 10px;
+    text-align: center;
+  }
+  
