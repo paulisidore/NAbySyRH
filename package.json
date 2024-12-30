@@ -13,12 +13,12 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/common": "^14.1.1",
-    "@angular/core": "^14.1.1",
-    "@angular/forms": "^14.1.1",
-    "@angular/platform-browser": "^14.1.1",
-    "@angular/platform-browser-dynamic": "^14.1.1",
-    "@angular/router": "^14.1.1",
+    "@angular/common": "^15.2.10",
+    "@angular/core": "^15.2.10",
+    "@angular/forms": "^15.2.10",
+    "@angular/platform-browser": "^15.2.10",
+    "@angular/platform-browser-dynamic": "^15.2.10",
+    "@angular/router": "^15.2.10",
     "@awesome-cordova-plugins/calendar": "^5.44.0",
     "@awesome-cordova-plugins/core": "5.44.0",
     "@awesome-cordova-plugins/file": "5.44.0",
@@ -75,15 +75,15 @@
     "zone.js": "~0.11.7"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^14.1.1",
+    "@angular-devkit/build-angular": "^15.2.11",
     "@angular-eslint/builder": "~14.0.2",
     "@angular-eslint/eslint-plugin": "~14.0.2",
     "@angular-eslint/eslint-plugin-template": "~14.0.2",
     "@angular-eslint/template-parser": "~14.0.2",
-    "@angular/cli": "^14.1.1",
-    "@angular/compiler": "^14.1.1",
-    "@angular/compiler-cli": "^14.1.1",
-    "@angular/language-service": "^14.1.1",
+    "@angular/cli": "^15.2.11",
+    "@angular/compiler": "^15.2.10",
+    "@angular/compiler-cli": "^15.2.10",
+    "@angular/language-service": "^15.2.10",
     "@capacitor/cli": "4.0.1",
     "@ionic/angular-toolkit": "^7.0.0",
     "@ionic/cli": "^7.2.0",
@@ -112,7 +112,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^2.0.0",
     "ts-node": "~10.9.1",
-    "typescript": "~4.7.4"
+    "typescript": "~4.9.5"
   },
   "description": "An Ionic project",
   "cordova": {
