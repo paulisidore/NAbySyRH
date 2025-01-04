@@ -3,21 +3,7 @@
     <ion-button fill="clear" slot="start" color="dark" (click)="_openSideNav()">
       <ion-icon slot="icon-only" name="menu"> </ion-icon>
     </ion-button>
-    <ion-buttons slot="end">
-      <ion-button color="success" (click)="addPrime()"> Ajouter </ion-button>
-      <ion-button
-        color="primary"
-        (click)=" removeVarious()"
-        *ngIf="!bulkEdit"
-        style="font-size: 25px"
-      >
-        <ion-icon slot="end" name="create"></ion-icon>
-      </ion-button>
-      <ion-button color="danger" (click)=" save()" *ngIf="bulkEdit">
-        ANNULER
-      </ion-button>
-    </ion-buttons>
-    <ion-title>prime</ion-title>
+    <ion-title>Paiement Salaire</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -28,18 +14,28 @@
   </ion-refresher>
   <!-- ***************************** -->
 
+  <ion-progress-bar
+    color="primary"
+    *ngIf="isProcessing"
+    [value]="progress"
+    >
+    
+  </ion-progress-bar>
+
+  <!-- ***************************** -->
+
   <div class="ion-justify-content-center" id="div1">
     <ion-grid class="ion-grid-user">
       <ion-title class="recherche">RECHERCHE</ion-title>
       <ion-row class="ion-justify-content-center" class="ion-row-user">
-        <ion-col size="4" class="ion-justify-content-center" id="col1">
+        <ion-col size="4" class="ion-justify-content-center">
           <!-- Date de départ -->
           <!-- <ion-title class="depart">Date de départ <br><ion-icon name="arrow-down-outline" ></ion-icon></ion-title> -->
           <ion-item id="open-modal">
             <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
-            <ion-label>Date de départ</ion-label>
+            <ion-label>Période</ion-label>
             <ion-text tappable slot="end"
-              >{{ formattedString| date:'dd MMMM yyy' }}</ion-text
+              >{{ formattedString| date:'MMMM yyyy' }}</ion-text
             >
             <ion-icon
               icon="calendar-outline"
@@ -56,6 +52,8 @@
                   #datetime
                   [value]="dateValue"
                   size="cover"
+                  displayFormat="MMMM yyyy"
+                  pickerFormat="MMMM yyyy"
                   (ionChange)="dateChanged(datetime.value)"
                   (ionCancel)="showPicker=false;"
                 >
@@ -90,117 +88,26 @@
             </ng-template>
           </ion-modal>
         </ion-col>
-
-        <ion-col size="4" class="ion-justify-content-center" id="col1">
-          <!-- Date de fin -->
-          <ion-item id="open-modal2">
-            <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
-            <ion-label>Date de Fin </ion-label>
-            <ion-text tappable slot="end"
-              >{{ formattedString2| date:'dd MMMM yyy' }}</ion-text
-            >
-            <ion-icon
-              icon="calendar-outline"
-              slot="end"
-              color="primary"
-              tappable
-            ></ion-icon>
-          </ion-item>
-
-          <ion-modal trigger="open-modal2" mode="md">
-            <ng-template>
-              <ion-content>
-                <ion-datetime
-                  #datetime
-                  [value]="dateValue2"
-                  size="cover"
-                  (ionChange)="dateChangedFin(datetime.value)"
-                  (ionCancel)="showPicker=false;"
-                >
-                </ion-datetime>
-                <ion-row>
-                  <ion-col size="4"
-                    ><ion-button
-                      (click)="close()"
-                      color="danger"
-                      class="dismiss"
-                      >Dismiss</ion-button
-                    ></ion-col
-                  >
-                  <ion-col size="4"
-                    ><ion-button
-                      (click)="effacedateFin()"
-                      color="warning"
-                      class="dismiss"
-                      >Effacer</ion-button
-                    ></ion-col
-                  >
-                  <ion-col size="4">
-                    <ion-button
-                      (click)="select()"
-                      color="primary"
-                      expand="block"
-                      >Select</ion-button
-                    ></ion-col
-                  >
-                </ion-row>
-              </ion-content>
-            </ng-template>
-          </ion-modal>
-        </ion-col>
-        <ion-col size="4" class="ion-justify-content-center" id="col1">
-          <!-- Select Employe -->
-          <!-- <ion-item>
-            <ion-label>Selectionnez des employés</ion-label>
-            <ion-select
-              [(ngModel)]="selectedEmployees"
-              multiple="true"
-              okText="Confirmer"
-              cancelText="Annuler"
-              (ionFocus)="fixAriaHiddenIssue()"
-              (ionChange)="fixAriaHiddenIssue()"
-
-              fullscreen="true"
-            >
-            
-              <ion-select-option (click)="selectAll()"
-                >Select All</ion-select-option
-              >
-              <ion-select-option *ngFor="let user of users" [value]="user">
-                {{ user.Prenom }} {{ user.Nom }} - {{ user.Fonction }} - {{
-                user.DIRECTION }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item> -->
-
+        <ion-col size="4">
           <ion-item>
-            <!-- <ion-label>Selectionnez des employés</ion-label> -->
-            <ion-button (click)="openEmployeeModal()">Sélectionner des employés</ion-button>
+            <ion-label position="floating">Note mode de Paiement</ion-label>
+            <ion-input
+              type="text" 
+              name="noteModePaiement"
+              [(ngModel)]="noteModePaiement"
+            ></ion-input>
           </ion-item>
-        </ion-col>
-      </ion-row>
-
-      <ion-row class="ion-justify-content-center">
-        <ion-col size="4"></ion-col>
-        <ion-col size="4"
-          ><!-- <ion-button
-            (click)="loadPrime()"
-            style="width: 300px"
-            shape="round"
-            color="success"
-          >
-            VALIDER</ion-button
-          > -->
+        </ion-col>        
+        <ion-col size="4" class="ion-justify-content-center" id="">
           <ion-button
-            (click)="saveSelection()"
+            (click)="validatePayment()"
             color="success"
             expand="block"
             [disabled]="!selectedEmployees || selectedEmployees.length === 0"
           >
-            Enregistrer la Sélection
+            Valider le paiement
           </ion-button>
         </ion-col>
-        <ion-col size="4"></ion-col>
       </ion-row>
     </ion-grid>
   </div>
@@ -213,99 +120,52 @@
       (ionInput)="filterEmployees()"
     ></ion-input>
   </ion-item>
+
+  <!-- Tableau avec Grid -->
   <ion-grid
     class="custom-table"
-    *ngIf="selectedEmployees && selectedEmployees.length > 0"
+    *ngIf="listeEmploye && listeEmploye.length > 0"
   >
+    <!-- En-tête de la table avec Select All -->
     <ion-row class="table-header">
-      <ion-col size="2">ID</ion-col>
+      <ion-col size="1">
+        <ion-checkbox
+          *ngIf="this.listeEmploye.length===this.selectedEmployees.length"
+          [(ngModel)]="selectAll"
+          (ionChange)="toggleSelectAll()"
+        ></ion-checkbox>
+        <ion-checkbox
+          *ngIf="this.listeEmploye.length!==this.selectedEmployees.length"
+          [(ngModel)]="selectAll"
+          (ionChange)="toggleSelectAll()"
+        ></ion-checkbox>
+      </ion-col>
+      <ion-col size="1">ID</ion-col>
       <ion-col size="4">Nom</ion-col>
-      <ion-col size="4">Fonction</ion-col>
-      <ion-col size="2">Action</ion-col>
+      <ion-col size="2">Salaire Brut</ion-col>
+      <ion-col size="2">Salaire Net</ion-col>
+      <ion-col size="2">Total Retenu</ion-col>
     </ion-row>
+
+    <!-- Liste des employés -->
     <ion-row
-      *ngFor="let emp of selectedEmployees | filter: searchTerm"
+      *ngFor="let user of listeEmploye | filter: searchTerm"
       class="table-row"
     >
-      <ion-col size="2">{{ emp.ID }}</ion-col>
-      <ion-col size="4">{{ emp.Prenom }} {{ emp.Nom }}</ion-col>
-      <ion-col size="4">{{ emp.Fonction }}</ion-col>
-      <ion-col size="2">
-        <ion-button color="danger" size="small" (click)="removeEmployee(emp)">
-          Supprimer
-        </ion-button>
+      <ion-col size="1">
+        <ion-checkbox
+          [(ngModel)]="user.selected"
+          (ionChange)="updateSelection(user)"
+        ></ion-checkbox>
       </ion-col>
+      <ion-col size="1">{{ user.IDEMPLOYE }}</ion-col>
+      <ion-col size="4"
+        >{{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}</ion-col
+      >
+      <ion-col size="2">{{ user.SALAIRE.SALAIRE_BRUT }}</ion-col>
+      <ion-col size="2">{{ user.SALAIRE.SALAIRE_NET }}</ion-col>
+      <ion-col size="2">{{ user.SALAIRE.TOTAL_RETENU }}</ion-col>
     </ion-row>
   </ion-grid>
 
-  <!-- tableaux -->
-  <!-- <div>
-    <table style="width: 100%; bottom: 0; left: 0; right: 0" [border]="1">
-      <thead style="background-color: #222; color: #fff; font-size: 20px">
-        <th style="text-align: center">Action</th>
-        <th style="text-align: center" tappable (click)="sortBy('Prenom')">
-          Prénom
-          <ion-icon name="arrow-down" *ngIf="sortDirection === 1"></ion-icon>
-          <ion-icon name="arrow-up" *ngIf="sortDirection === 2"></ion-icon>
-        </th>
-        <th style="text-align: center">Nom</th>
-        <th style="text-align: center">Sexe</th>
-        <th style="text-align: center">Fonction</th>
-        <th style="text-align: center">Nombre performance</th>
-        <th style="text-align: center">Total performance</th>
-        <th style="text-align: center">Motif</th>
-        <th style="text-align: center">Commentaires</th>
-        <th style="text-align: center">Point</th>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let d of listePrime"
-          class="data-row"
-          style="font-size: 20px"
-        >
-          <td style="text-align: center" *ngIf="bulkEdit">
-            <ion-icon
-              slot="start"
-              name="eye-outline"
-              color="primary"
-              tappable
-              (click)="primedetails(d)"
-            ></ion-icon>
-            <ion-icon
-              slot="start"
-              name="create-outline"
-              color="success"
-              tappable
-              (click)="updatePrime(d)"
-            ></ion-icon>
-            <ion-icon
-              slot="start"
-              name="trash-outline"
-              color="danger"
-              tappable
-              (click)="removePrime(d)"
-            ></ion-icon>
-          </td>
-          <td style="text-align: center" *ngIf="!bulkEdit">
-            <ion-icon
-              slot="start"
-              name="eye-outline"
-              color="primary"
-              tappable
-              (click)="primedetails(d)"
-            ></ion-icon>
-          </td>
-          <td style="text-align: center">{{d.PrenomEmploye}}</td>
-          <td style="text-align: center">{{d.NomEmploye}}</td>
-          <td style="text-align: center">{{d.SexeEmploye}}</td>
-          <td style="text-align: center">{{d.FonctionEmploye}}</td>
-          <td style="text-align: center">{{d.NB_ENREGISTREMENT}}</td>
-          <td style="text-align: center">{{d.TOTAL_PERFORMANCE}}</td>
-          <td style="text-align: center">{{d.Motif}}</td>
-          <td style="text-align: center">{{+d.Commentaires}}</td>
-          <td style="text-align: center">{{d.NbPointAjoute}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div> -->
 </ion-content>

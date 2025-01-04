@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { Component, Input, OnInit } from '@angular/core';
+import { ModalController, NavParams } from '@ionic/angular';
+import { LoadingService } from 'src/app/services/loading.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -9,18 +11,29 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./employee-modal.page.scss'],
 })
 export class EmployeeModalPage implements OnInit {
+  @Input() selectedMonth: string;
   users = []; // Liste complète des employés
   filteredUsers = []; // Liste filtrée des employés
   searchText = ''; // Texte de recherche
   selectedEmployees = []; // Liste des employés sélectionnés
+  selectedYear: '';
+  selectAllChecked: boolean = false; // Indicateur pour "Select All"
 
   constructor(
     private modalController: ModalController,
-    private http: HttpClient
+    private http: HttpClient,
+    private navParams: NavParams, private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
     // Appeler loadEmploye() pour récupérer les employés lors de l'initialisation
+    // Récupérer les données du mois, année et employés sélectionnés
+    /*    this.selectedMonth = this.selectedMonth;
+     this.selectedYear = this.selectedYear; */
+    this.selectedMonth = this.navParams.get('month');
+    this.selectedYear = this.navParams.get('year');
+    console.log('Month:', this.selectedMonth);
+    console.log('Year:', this.selectedYear);
     this.loadEmploye();
   }
   readAPI(url: string) {
@@ -28,6 +41,7 @@ export class EmployeeModalPage implements OnInit {
   }
   // Charger la liste des employés (méthode à appeler)
   loadEmploye() {
+    this.loadingService.presentLoading();
     const token = localStorage.getItem('nabysy_token');
     if (!token) {
       console.error('Token not found');
@@ -35,14 +49,20 @@ export class EmployeeModalPage implements OnInit {
     }
 
     // Requête API pour récupérer la liste des employés
-    this.readAPI(
+    const URL =
       environment.endPoint +
-        'employe_action.php?Action=GET_EMPLOYE&Token=' +
-        token
-    ).subscribe((listes: any) => {
+      'salaire_action.php?Action=GET_BULLETIN_LIST&MOIS=' +
+      this.selectedMonth +
+      '&ANNEE=' +
+      this.selectedYear +
+      '&Token=' +
+      token;
+      console.log(URL);
+    this.readAPI(URL).subscribe((listes: any) => {
       this.users = listes; // Liste des employés
       this.filteredUsers = [...this.users]; // Initialisation de la liste filtrée
-
+      console.log(listes);
+      this.loadingService.dismiss();
       // Marquer les employés déjà sélectionnés
       for (const user of this.users) {
         user.selected = this.selectedEmployees.some(
@@ -84,5 +104,25 @@ export class EmployeeModalPage implements OnInit {
   // Fermer le modal sans aucune sélection
   dismiss() {
     this.modalController.dismiss();
+  }
+  // Fonction pour "Sélectionner tout"
+  selectAll() {
+    this.filteredUsers.forEach(user => {
+      user.selected = true; // Sélectionner tous les utilisateurs
+    });
+    this.selectedEmployees = [...this.filteredUsers]; // Ajouter tous les employés à la liste des sélectionnés
+    this.selectAllChecked = true; // Marquer "Select All" comme sélectionné
+  }
+
+  // Fonction pour inverser la sélection du "Select All"
+  toggleSelectAll() {
+    if (this.selectAllChecked) {
+      this.selectAll(); // Si "Select All" est activé, on sélectionne tous les utilisateurs
+    } else {
+      this.filteredUsers.forEach(user => {
+        user.selected = false; // Désélectionner tous les utilisateurs
+      });
+      this.selectedEmployees = []; // Vider la liste des sélectionnés
+    }
   }
 }
