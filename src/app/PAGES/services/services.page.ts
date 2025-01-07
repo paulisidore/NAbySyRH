@@ -65,7 +65,7 @@ refreshServices(){
     }else if(this.detailService.IdDirection>0){
       txZone='&IdDirection='+this.detailService.IdDirection ;
     }
-    this.url=environment.endPoint+'employe_action.php?Action=GET_EMPLOYE'+txZone+'&Token='+environment.tokenUser;
+    this.url=environment.endPoint+'employe_action.php?Action=GET_EMPLOYE'+txZone+'&Token='+localStorage.getItem('nabysy_token');
 
     this.readAPI(this.url)
     .subscribe((data) =>{
@@ -119,7 +119,7 @@ refreshServices(){
             headers.append('Accept', 'application/json');
             headers.append('Content-Type', 'application/json' );
             const apiUrl=environment.endPoint+'employe_action.php?Action=SAVE_EMPLOYE&IdEmploye='+
-            employe.ID+'&IdDirection=0&IdService=0&Token='+environment.tokenUser;
+            employe.ID+'&IdDirection=0&IdService=0&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);

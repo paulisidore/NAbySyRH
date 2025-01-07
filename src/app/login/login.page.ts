@@ -87,7 +87,7 @@ export class LoginPage implements OnInit {
       this.http.get(apiUrl).subscribe(async data => {
        console.log(data['Extra']);
        if (data['OK'] !== 0) {
-          environment.tokenUser=data['Extra'] ;
+          // environment.tokenUser=data['Extra'] ;
           localStorage.setItem('nabysy_token',data['Extra']);
           //Recup info de l'utilisateur connecté
           await this.getInfosUtilisateur();
