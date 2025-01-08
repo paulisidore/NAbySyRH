@@ -4,25 +4,24 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { SalairesPageRoutingModule } from './salaires-routing.module';
+import { PaiementSalairePageRoutingModule } from './paiement-salaire-routing.module';
 
-import { SalairesPage } from './salaires.page';
-import { IonicSelectableModule } from 'ionic-selectable';
+import { PaiementSalairePage } from './paiement-salaire.page';
 import { Ng2OrderModule } from 'ng2-order-pipe';
 import { Ng2SearchPipeModule } from 'ng2-search-filter';
+import { IonicSelectableModule } from 'ionic-selectable';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    SalairesPageRoutingModule,
+    PaiementSalairePageRoutingModule,
+    ReactiveFormsModule,
     IonicSelectableModule,
     Ng2SearchPipeModule,
     Ng2OrderModule,
-    ReactiveFormsModule
   ],
-  // schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
-  declarations: [SalairesPage]
+  declarations: [PaiementSalairePage],
 })
-export class SalairesPageModule {}
+export class PaiementSalairePageModule {}

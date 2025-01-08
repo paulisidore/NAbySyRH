@@ -1,0 +1,531 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-button fill="clear" slot="start" color="dark" (click)="_openSideNav()">
+      <ion-icon slot="icon-only" name="menu"> </ion-icon>
+    </ion-button>
+    <ion-title>salaires</ion-title>
+  </ion-toolbar>
+
+    <!-- Segment -->
+  <ion-toolbar color="tertiary">
+    <ion-segment [(ngModel)]="selectedSegment">
+          <ion-segment-button [value]="item" *ngFor="let item of segmentList;let i = index"
+              (click)="_segmentSelected(item,i)">
+              <ion-label class="segment-text">{{item}}</ion-label>
+          </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-slides mode="ios" pager="ios" scrollbar="ios" #slide (ionSlideDidChange)="_ionSlideDidChange($event)">
+
+    <!-- Paiement de Ssalaire -->
+    <ion-slide value="0">
+      <div class="stats-container" style="height:100%; width:100%;">
+        <div class="ion-justify-content-center">
+
+          <ion-grid  class="ion-grid-user">
+            <ion-row class="ion-justify-content-center" class="ion-row-user">
+              <ion-col size="12"size-sm="6" size-md="4" size-lg="4" size-xl="4" class="ion-justify-content-center" style="border: 5px solid rgb(16, 248, 66);">
+                <ion-item>
+                  <ion-label>Choisir un Salarié</ion-label>
+
+                  <ionic-selectable #selectComponent [(ngModel)]="selected" itemValueField="ID"
+                  itemTextField="Prenom" [items]="users" headerColor="primary" [canSearch]="true"
+                  searchFailText=" Rien n'a été trouvé:("  [canClear]="true"
+                  >
+                  <!-- ****************************** -->
+                  <ng-template ionicSelectableCloseButtonTemplate color="danger">
+                    <ion-button fill="clear" color="danger">
+                      <ion-icon  name="close-circle"></ion-icon>
+                    </ion-button>
+
+                  </ng-template>
+
+                  <ng-template ionicSelectableItemTemplate let-user="item">
+                    {{user.Prenom +' '+ user.Nom +'   ====> '+user.Fonction+' ===>Matricule: '+user.ID }}
+                  </ng-template>
+                  <!-- ******************************** -->
+                  <ng-template ionicSelectableFooterTemplate>
+                    <ion-toolbar>
+                      <ion-row>
+                        <ion-col size="4">
+                          <ion-button expand="full" (click)="clear()">
+                            Annuler
+                          </ion-button>
+                        </ion-col >
+                        <ion-col  size="4">
+                          <ion-button expand="full" (click)="toggleItems()" [disabled]="!selectComponent.itemsToConfirm.length">
+                            Décocher
+                          </ion-button>
+                        </ion-col>
+                        <ion-col size="4">
+                          <ion-button expand="full" (click)="confirm()" [disabled]="!selectComponent.itemsToConfirm.length">
+                            Confirmer
+                          </ion-button>
+                        </ion-col>
+                      </ion-row>
+                    </ion-toolbar>
+                  </ng-template>
+                </ionic-selectable>
+                </ion-item>
+                <!-- Date -->
+                <ion-item id="open-modal">
+                  <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+                  <ion-label>Période</ion-label>
+                  <ion-text tappable slot="end">{{ formattedString| date: 'MMMM, YYYY' }}</ion-text>
+                  <ion-icon icon="calendar-outline" slot="end" color="primary" tappable></ion-icon>
+                </ion-item>
+
+                <ion-modal trigger="open-modal" mode="md">
+                  <ng-template>
+                    <ion-content>
+                      <ion-datetime
+                        #datetime
+                        [value]="dateValue" size="cover"
+                        (ionChange)="dateChanged(datetime.value)"
+                        (ionCancel)="showPicker=false;">
+                      </ion-datetime >
+                        <ion-row>
+                          <ion-col size="4"><ion-button (click)="close()" color="danger" class="dismiss">Dismiss</ion-button></ion-col>
+                          <ion-col size="4"></ion-col>
+                          <ion-col size="4"><ion-button (click)="select()" color="primary" expand="full">Choisir</ion-button></ion-col>
+                        </ion-row>
+
+
+
+                    </ion-content>
+                  </ng-template>
+                </ion-modal>
+                <!-- <p>{{selectedMonth+' '+selectedDate}}</p> -->
+                <div *ngIf="selected">
+                  <ion-chip color="primary">{{  formattedString| date: 'MMMM'}}</ion-chip>
+                  <ion-chip color="secondary" >{{selectedDate}}</ion-chip>
+                  <ion-button expand="block" color="success" shape="round"(click)="userdetails(selected)"style="margin-bottom:10px; margin-top:10px;"> Voir </ion-button>
+                  <ion-button expand="block" color="success" shape="round"style="margin-bottom:10px;" (click)="avanceSalaire(listeSalaire)"> Avance </ion-button>
+                  <ion-button expand="block"  (click)="doRefresh($event)"style="margin-bottom:10px;"> rafraîchir </ion-button>
+                  <ion-button expand="block" (click)="bulletinBulkEdit()" style="margin-bottom:10px;">Afficher Bulletin</ion-button>
+                  <ion-button expand="block" (click)="downloadPdf()">Imprimer Bulletin</ion-button>
+                  <ion-item>
+                    <ion-label>
+                      <ion-text >PRENOM & NOM</ion-text>
+                      <h3><ion-text color="dark" style="font-weight: bold;">{{selected.Prenom+' '}}{{selected.Nom}}</ion-text></h3>
+                    </ion-label>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label>
+                      <ion-text >SALAIRE NET</ion-text>
+                      <p><ion-text color="dark" style="font-weight: bold;">{{this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_NET+'  FCFA'}} </ion-text></p>
+                    </ion-label>
+                  </ion-item>
+                  <ion-button expand="block" (click)="payerSalaire(this.listeSalaire)">Payer salaire</ion-button>
+                </div>
+              </ion-col>
+              <ion-col size="12" size-sm="6" size-md="4" size-lg="4" size-xl="4" class="ion-justify-content-center"*ngIf="selected" style="margin-top: 0;">
+                <ion-card>
+                  <!-- <img src="../assets/man.png" alt="" > -->
+                  <img [src]=" selected.PHOTO_URL " alt="" style="height: 300px; margin-top: 10px;" >
+
+                  <ion-card-header>
+                    <ion-card-title>{{selected.Prenom +' '+ selected.Nom}}</ion-card-title>
+                    <ion-card-subtitle>{{selected.Fonction}}</ion-card-subtitle>
+                  </ion-card-header>
+
+                  <ion-card-content>
+                    <ion-label>
+                      {{'Adresse: '+selected.Adresse }}
+                    </ion-label><br>
+                    <ion-label>{{selected.DIRECTION}}</ion-label><br>
+                    <ion-label>{{selected.SERVICE}}</ion-label>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+
+              <ion-col size="12" size-sm="6" size-md="4" size-lg="3" size-xl="2" class="ion-justify-content-center" *ngIf="selected">
+                <!-- <ion-card>
+                    <ion-card-content>
+                    </ion-card-content>
+                  </ion-card> -->
+
+              </ion-col>
+
+              <ion-col size="12" size-sm="6" size-md="4" size-lg="3" size-xl="2" class="ion-justify-content-center">
+
+                  <!-- <ion-button (click)="goToPrint(selected)" >Imprimer Bulletin</ion-button> -->
+
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+    </div>
+
+    <ion-card >
+      <ion-card-content>
+
+      </ion-card-content>
+    </ion-card>
+    <!-- Bulletin de salaire -->
+    <div *ngIf="selected">
+      <div *ngIf="bulkEdit">
+
+        <ion-row class="ion-row1" >
+          <ion-col size="3" ><ion-text ><h1 class="firm">{{this.listeSalaire.BULLETIN_SALAIRE.NOM_ENTREPRISE}}</h1> </ion-text></ion-col>
+          <ion-col size="6">
+            <ion-text ><h1> <strong>Adresse:</strong>{{' '+this.listeSalaire.BULLETIN_SALAIRE.ADR_ENTREPRISE}}</h1></ion-text>
+            <ion-text ><h1> <strong>Téléphone:</strong> {{' '+this.listeSalaire.BULLETIN_SALAIRE.TEL_ENTREPRISE}}</h1></ion-text>
+            <ion-text ><h1> <strong>Fax:</strong>{{' '+this.listeSalaire.BULLETIN_SALAIRE.CONTACT_ENTREPRISE}}</h1></ion-text>
+            <ion-text ><h1> <strong>Email:</strong>{{' '+this.listeSalaire.BULLETIN_SALAIRE.EMAIL_ENTREPRISE}}</h1></ion-text>
+            </ion-col>
+          <ion-col size="3"><ion-text><h1 class="firm2" >BULLETIN DE PAIE</h1></ion-text></ion-col>
+        </ion-row >
+        <ion-row class="ion-row2">
+          <ion-col size="3"><ion-text ><h3>CONVENTION COLLECTIVE</h3></ion-text></ion-col>
+          <ion-col size="6"><ion-text ><h2>PRENOM & NOM</h2></ion-text></ion-col>
+          <ion-col size="3"><ion-text ><h3>ADRESSE</h3></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row3">
+          <ion-col size="3"><ion-text ><h1>{{qualifiquation}}</h1></ion-text></ion-col>
+          <ion-col size="6"><ion-text ><h1 class="name">{{this.prenom+' '+this.nom}}</h1></ion-text></ion-col>
+          <ion-col size="3"><ion-text ><h1>{{adresse}}</h1></ion-text></ion-col>
+        </ion-row>
+        <ion-row  class="ion-row4">
+          <ion-col size="12"></ion-col>
+        </ion-row>
+        <ion-row class="ion-row5">
+          <ion-col size="3"><ion-text><h2>QUALIFICATION</h2></ion-text> </ion-col>
+          <ion-col size="1"><ion-text><P>N° D'ORDRE</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>CATEGORIE</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>SITUATION FAMILIALE</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>PART TRIMF</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>PART IRPP</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>PERIODE DE PAIE</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>DATE D'EMBAUCHE</P></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row6">
+          <ion-col size="3"><ion-text><h1>{{qualifiquation}}</h1></ion-text> </ion-col>
+          <ion-col size="1"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{categorie}}</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{situationFa}}</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{partTrimf}}</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{partIrpp}}</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>{{periodePaie}}</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>{{dateEmbauche}}</P></ion-text></ion-col>
+        </ion-row>
+        <ion-row  class="ion-row7">
+          <ion-col size="8.8" class="rubrique"></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <!-- <ion-col size="3"><ion-text><p>COTISATIONS PATRONALES</p></ion-text> </ion-col> -->
+          <ion-col size="3" class="rubrique2" ><ion-text><h3>COTISATIONS PATRONALES</h3></ion-text> </ion-col>
+        </ion-row>
+        <ion-row class="ion-row8">
+          <ion-col size="3" class="rubrique"><ion-text><h3>LIBELLE RUBRIQUE</h3></ion-text> </ion-col>
+          <ion-col size="1.9" class="rubrique"><ion-text><P>BASE</P></ion-text></ion-col>
+          <ion-col size="1" class="rubrique"><ion-text><P>TAUX</P></ion-text></ion-col>
+          <ion-col size="1.5" class="rubrique"><ion-text><P>GAINS</P></ion-text></ion-col>
+          <ion-col size="1.4" class="rubrique"><ion-text><P>RETENUES</P></ion-text></ion-col>
+          <ion-col size="0.1"class="separation"></ion-col>
+          <ion-col size="1" class="rubrique"><div><ion-text><P>TAUX</P></ion-text></div></ion-col>
+          <ion-col size="2" class="rubrique"><ion-text><P>MONTANT</P></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row9" *ngFor="let bulletin of gainPrime">
+          <ion-col size="3"><ion-text><h3>{{bulletin.Libelle}}</h3></ion-text> </ion-col>
+          <ion-col size="1.9"><ion-text><P>{{bulletin.Base}}</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{bulletin.Taux}}</P></ion-text></ion-col>
+          <ion-col size="1.5"><ion-text><P>{{bulletin.Gain}}</P></ion-text></ion-col>
+          <ion-col size="1.4"><ion-text><P>{{bulletin.Retenu}}</P></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1"><ion-text><P>{{bulletin.COTISATION_PATRONALE_TAUX}}</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>{{bulletin.COTISATION_PATRONALE_MONTANT}}</P></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row10">
+          <ion-col size="3" class="rubrique"><ion-text><h3>**Salaire Brut** (1)</h3></ion-text> </ion-col>
+          <ion-col size="1.9"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.5"class="rubrique"><ion-text><P>{{this.salaireBrut}}</P></ion-text></ion-col>
+          <ion-col size="1.4"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1" class="rubrique"><div><ion-text><P></P></ion-text></div></ion-col>
+          <ion-col size="2"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row11" *ngFor="let bulletin of ligneCotisation">
+          <ion-col size="3"><ion-text><h3>{{bulletin.Libelle}}</h3></ion-text> </ion-col>
+          <ion-col size="1.9"><ion-text><P>{{bulletin.Base}}</P></ion-text></ion-col>
+          <ion-col size="1"><ion-text><P>{{bulletin.Taux}}</P></ion-text></ion-col>
+          <ion-col size="1.5"><ion-text><P>{{bulletin.Gain}}</P></ion-text></ion-col>
+          <ion-col size="1.4"><ion-text><P>{{bulletin.Retenu}}</P></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1"><ion-text><P>{{bulletin.COTISATION_PATRONALE_TAUX}}</P></ion-text></ion-col>
+          <ion-col size="2"><ion-text><P>{{bulletin.COTISATION_PATRONALE_MONTANT}}</P></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row14">
+          <ion-col size="3" class="rubrique"><ion-text><h3>Total Cotisation Patronale</h3></ion-text> </ion-col>
+          <ion-col size="1.9"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.5"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.4"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1" class="rubrique2"><div><ion-text><P></P></ion-text></div></ion-col>
+          <ion-col size="2"class="rubrique3"><ion-text><h3>{{this.listeSalaire.BULLETIN_SALAIRE.TOTAL_COTISATION_PATRONALE}}</h3></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row12">
+          <ion-col size="3" class="rubrique"><ion-text><h3>**Total des retenues** (2)</h3></ion-text> </ion-col>
+          <ion-col size="1.9"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.5"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.4"class="rubrique"><ion-text><h3>{{this.listeSalaire.BULLETIN_SALAIRE.TOTAL_RETENU}}</h3></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1" class="rubrique2"><div><ion-text><P></P></ion-text></div></ion-col>
+          <ion-col size="2"class="rubrique3"><ion-text><h3></h3></ion-text></ion-col>
+        </ion-row>
+        <ion-row class="ion-row13">
+          <ion-col size="3" class="rubrique"><ion-text><h3>**Salaire Net** (3) = (1) - (2)</h3></ion-text> </ion-col>
+          <ion-col size="1.9"class="rubrique"><ion-text><h3>{{this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_NET}}</h3></ion-text></ion-col>
+          <ion-col size="1"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.5"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="1.4"class="rubrique"><ion-text><P></P></ion-text></ion-col>
+          <ion-col size="0.1" class="separation"></ion-col>
+          <ion-col size="1" class="rubrique2"><div><ion-text><P></P></ion-text></div></ion-col>
+          <ion-col size="2"class="rubrique3"><ion-text><h3></h3></ion-text></ion-col>
+        </ion-row>
+      </div>
+    </div>
+
+      </div>
+    </ion-slide>
+
+    <!-- Historique -->
+    <ion-slide value="1">
+      <div class="stats-container" style="height:100%; width:100%;">
+        <h1>CRITERE DE RECHERCHE</h1>
+        <ion-row style="border: 1px solid #000; margin-top: 10px;">
+          <ion-col size="4" style="border: 0; border-right: 1px solid #000;">
+            <!-- Date de départ -->
+            <!-- <ion-title class="depart">Date de départ <br><ion-icon name="arrow-down-outline" ></ion-icon></ion-title> -->
+            <ion-item id="open-modal2">
+              <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+              <ion-label>Date de départ</ion-label>
+              <ion-text tappable slot="end">{{ formattedString2| date: 'dd MMMM YYYY' }}</ion-text>
+              <ion-icon icon="calendar-outline" slot="end" color="primary" tappable></ion-icon>
+            </ion-item>
+
+            <ion-modal trigger="open-modal2" mode="md">
+              <ng-template>
+                <ion-content>
+                  <ion-datetime
+                    #datetime
+                    [value]="dateValue2" size="cover"
+                    (ionChange)="dateChangedHistory(datetime.value)"
+                    (ionCancel)="showPicker=false;">
+                  </ion-datetime >
+                    <ion-row style="border: 0;">
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="close_H()" color="danger" class="dismiss">Fermer</ion-button></ion-col>
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="effacedateDebut()" color="warning" class="dismiss">Effacer</ion-button></ion-col>
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="select_H()" color="primary" expand="full">Choisir</ion-button></ion-col>
+                    </ion-row>
+                </ion-content>
+              </ng-template>
+            </ion-modal>
+          </ion-col>
+          <ion-col size="4" style="border: 0; border-right: 1px solid #000;">
+            <!-- Date de fin -->
+            <ion-item id="open-modal3">
+              <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+              <ion-label>Date de Fin </ion-label>
+              <ion-text tappable slot="end">{{ formattedString3 }}</ion-text>
+              <ion-icon icon="calendar-outline" slot="end" color="primary" tappable></ion-icon>
+            </ion-item>
+
+            <ion-modal trigger="open-modal3" mode="md">
+              <ng-template>
+                <ion-content>
+                  <ion-datetime
+                    #datetime
+                    [value]="dateValue3" size="cover"
+                    (ionChange)="dateChangedHistoryEnd(datetime.value)"
+                    (ionCancel)="showPicker=false;">
+                  </ion-datetime >
+                    <ion-row style="border: 0;">
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="close_H()" color="danger" class="dismiss">Fermer</ion-button></ion-col>
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="effacedateFin()" color="warning" class="dismiss">Effacer</ion-button></ion-col>
+                      <ion-col size="4" style="border: 0;"><ion-button (click)="select_H()" color="primary" expand="full">Choisir</ion-button></ion-col>
+                    </ion-row>
+                </ion-content>
+              </ng-template>
+            </ion-modal>
+          </ion-col>
+          <ion-col size="4" style="border: 0;">
+            <!-- Select Employe -->
+              <ion-item>
+                <ion-label>Selectionnez un employe</ion-label>
+
+                <ionic-selectable #selectComponent2 [(ngModel)]="selected_H" itemValueField="ID"
+                itemTextField="Prenom" [items]="users" headerColor="primary" [canSearch]="true"
+                searchFailText=" Rien n'a été trouvé:("  [canClear]="true"
+                >
+                <!-- ****************************** -->
+                <ng-template ionicSelectableCloseButtonTemplate color="danger">
+                  <ion-button fill="clear" color="danger">
+                    <ion-icon  name="close-circle"></ion-icon>
+                  </ion-button>
+
+                </ng-template>
+
+                <ng-template ionicSelectableItemTemplate let-user="item">
+                  {{user.Prenom +' '+ user.Nom +'   ====> '+user.Fonction+' ===>Matricule: '+user.ID }}
+                </ng-template>
+                <!-- ******************************** -->
+                <ng-template ionicSelectableFooterTemplate>
+                  <ion-toolbar>
+                    <ion-row>
+                      <ion-col size="4">
+                        <ion-button expand="full" (click)="clear_H()">
+                          Annuler
+                        </ion-button>
+                      </ion-col >
+                      <ion-col  size="4">
+                        <ion-button expand="full" (click)="toggleItems_H()" [disabled]="!selectComponent2.itemsToConfirm.length">
+                          Décocher
+                        </ion-button>
+                      </ion-col>
+                      <ion-col size="4">
+                        <ion-button expand="full" (click)="confirm_H()" [disabled]="!selectComponent2.itemsToConfirm.length">
+                          Confirmer
+                        </ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-toolbar>
+                </ng-template>
+              </ionic-selectable>
+              </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-button (click)="loadHistorySalary()"  shape="round" color="success" style="width: 300px;" >Rechercher</ion-button>
+
+        <ion-card *ngFor="let item of historySalaire " class="ion-margin" style="border: 0px #fff; ">
+          <ion-card-header>
+            <ion-card-subtitle >
+              <strong>{{item.DatePaie}}</strong>
+            </ion-card-subtitle>
+            <ion-item >
+              <!-- <ion-label>{{item.Prenom}}</ion-label> -->
+              <ion-label >
+                <ion-text style="background-color: orange;">Montant Versé: {{item.TotalVers}}</ion-text></ion-label>
+              <ion-label slot="end" >{{item.Prenom+' '+item.Nom}}</ion-label>
+             <!--  <ion-icon [style.color]="item.DateEnreg === today ? 'red' :(item.DateEnreg === yesterdayToString ?'orange': 'green')"
+              size="small" name="ellipse" slot="end"></ion-icon> -->
+              <ion-icon color="danger"
+              size="small" name="ellipse" slot="end"></ion-icon>
+
+            </ion-item>
+          </ion-card-header>
+          <ion-card-content style="border: 0px #fff; ">
+            <!-- <ion-label>Due {{item.heureEnreg | date:'fullDate'}}</ion-label> -->
+            <ion-accordion-group expand="">
+                <ion-accordion value="infos">
+                <ion-item slot="header">
+                  <!-- <ion-label>Date {{item.DateEnreg | date:'fullDate' }}</ion-label> -->
+                  <!-- <ion-label>Enregistrée le  {{item.DateEnreg | date:'fullDate'}} {{'à '+item.HeureEnreg}}</ion-label> -->
+                  <!-- <ion-label>Enregistrée  {{item.DateEnreg===today ?"Aujourd\'hui" : (item.DateEnreg=== '2022/09/01' ? 'Hier': 'le '+item.DateEnreg | date:'fullDate')}} {{'à '+item.HeureEnreg}}</ion-label> -->
+                  <ion-label slot="end">N°  {{item.ID }}</ion-label>
+
+                </ion-item>
+                <ion-list slot="content">
+                  <ion-row >
+                    <ion-col size="12" size-sm="6" size-md="6" size-lg="6" size-xl="6"style="border: 1px solid #000;">
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">Nom:</ion-text></p>{{item.Nom}}</ion-label>
+                      </ion-item>
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">Prénom:</ion-text> </p>{{item.Prenom}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Sexe:</ion-text></p>{{item.Sexe}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Situation_Famille:</ion-text></p>{{item.Situation_Famille}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Date de Paie:</ion-text></p>{{item.DatePaie}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Heure de Paie:</ion-text></p>{{item.HeurePaie}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Fonction:</ion-text></p>{{item.Fonction}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Mode de Paiement:</ion-text></p>{{item.TextModePaiement}}</ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col size="12" size-sm="6" size-md="6" size-lg="6" size-xl="6" style="border: 1px solid #000;">
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">Matricule:</ion-text></p>{{item.IdEmploye}}</ion-label>
+                      </ion-item>
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">Mois:</ion-text></p>{{'Mois: '+item.IdMois | date:'MMMM'}}</ion-label>
+                      </ion-item>
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">A reçu une avance:</ion-text></p>{{item.IsAvance=== '1' ? "OUI" : "NON"}}
+                        </ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Annee:</ion-text></p>{{item.Annee}}</ion-label>
+                      </ion-item>
+                      <ion-item >
+                        <ion-label><p><ion-text color="dark">Mode de Paiement:</ion-text></p>{{item.ModePaiement}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Total Avance Précédente:</ion-text></p>{{item.TotalAvancePrec}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Total Avance Suivante:</ion-text></p>{{item.TotalAvanceSuiv}}</ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label><p><ion-text color="dark">Total Versé:</ion-text> </p>{{item.TotalVers}}</ion-label>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-list>
+              </ion-accordion>
+            </ion-accordion-group>
+          </ion-card-content>
+
+          <ion-row style="border: 0; ">
+            <ion-item>
+              <ion-button size="small" (click)="salairedetails(item)" color="dark" fill="clear">
+              <ion-icon name="eye-outline" slot="start"></ion-icon>
+              <p>Voir</p>
+            </ion-button>
+
+            </ion-item>
+
+          </ion-row>
+
+
+        </ion-card>
+
+      </div>
+    </ion-slide>
+
+    <!-- <ion-slide value="2">
+      <div>
+          <ion-label>3rd Segment</ion-label>
+      </div>
+    </ion-slide>
+    <ion-slide value="3">
+      <div>
+          <ion-label>3rd Segment</ion-label>
+      </div>
+    </ion-slide> -->
+
+  </ion-slides>
+
+
+
+</ion-content>

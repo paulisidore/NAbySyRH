@@ -19,11 +19,15 @@ import { PhotoViewer } from '@ionic-native/photo-viewer/ngx';
 import { registerLocaleData } from '@angular/common';
 import * as fr from '@angular/common/locales/fr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { InertDirective } from './services/inert.directive';
+import { PaiementSalairePage } from './PAGES/paiement-salaire/paiement-salaire.page';
+
+
 
 
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent,  InertDirective,],
   imports: [BrowserModule,IonicModule.forRoot(),
     HttpClientModule, AppRoutingModule, IonicSelectableModule,FormsModule,ReactiveFormsModule],
   providers: [

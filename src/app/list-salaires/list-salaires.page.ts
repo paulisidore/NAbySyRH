@@ -31,14 +31,12 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { format, parseISO } from 'date-fns';
 import { PopupModalService } from 'src/app/services/popup-modal.service';
 
-(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
-
 @Component({
-  selector: 'app-salaires',
-  templateUrl: './salaires.page.html',
-  styleUrls: ['./salaires.page.scss'],
+  selector: 'app-list-salaires',
+  templateUrl: './list-salaires.page.html',
+  styleUrls: ['./list-salaires.page.scss'],
 })
-export class SalairesPage implements OnInit {
+export class ListSalairesPage implements OnInit {
   listeSalaire: any;
   historySalaire: any;
   url: string;
@@ -134,14 +132,16 @@ export class SalairesPage implements OnInit {
     private http: HttpClient,
     private popupModalService: PopupModalService,
     private toastctrl: ToastController
-  ) {
+  ) {}
+
+  ngOnInit() {
     this.idBoutiquePaie = 0;
     this.idMethodePaie = 0;
 
     /* this.loadEmploye();
       this.loadSalary();
       this.loadHistorySalary(); */
-    /* this.loadInfoMensuel(); */
+
     if (this.listeSalaire) {
       this.id = this.listeSalaire.IdEmploye;
       if (this.id > 0) {
@@ -158,12 +158,12 @@ export class SalairesPage implements OnInit {
         this.showtof = false;
       }
     }
-  }
-  ngOnInit() {
+
     console.log('Chargement des données...');
     this.loadEmploye();
-    this.loadSalary();
-    this.loadHistorySalary();
+   this.loadSalary();
+   this.loadHistorySalary();
+   this.loadInfoMensuel();
   }
 
   //Segment
@@ -541,9 +541,9 @@ export class SalairesPage implements OnInit {
             },
 
             /* {
-                  text: new Date().toTimeString(),
-                  alignment: 'right',
-                } */
+                    text: new Date().toTimeString(),
+                    alignment: 'right',
+                  } */
           ],
         },
 
@@ -691,7 +691,7 @@ export class SalairesPage implements OnInit {
             body: [
               [
                 { text: 'QUALIFICATION', alignment: 'center', style: 'header' },
-                { text: "N° D'ordre", alignment: 'center', fontSize: 10 },
+                { text: 'N° D\'ordre', alignment: 'center', fontSize: 10 },
                 { text: 'Catégorie', alignment: 'center', fontSize: 10 },
                 {
                   text: 'Situation\n Familiale',
@@ -701,7 +701,7 @@ export class SalairesPage implements OnInit {
                 { text: 'PART IRPP', alignment: 'center', fontSize: 10 },
                 { text: 'PART\n TRIMF', alignment: 'center', fontSize: 10 },
                 { text: 'Période de Paie', alignment: 'center', fontSize: 10 },
-                { text: "DATE D'embauche", alignment: 'center', fontSize: 10 },
+                { text: 'DATE D\'embauche', alignment: 'center', fontSize: 10 },
               ],
               [
                 {

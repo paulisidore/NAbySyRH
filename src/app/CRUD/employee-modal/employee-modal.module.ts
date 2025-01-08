@@ -4,16 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { PrintBulletin2Page } from './print-bulletin2.page';
-import { PrintBulletin2PageRoutingModule } from './print-bulletin2-routing.module';
+import { EmployeeModalPageRoutingModule } from './employee-modal-routing.module';
+
+import { EmployeeModalPage } from './employee-modal.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    PrintBulletin2PageRoutingModule
+    EmployeeModalPageRoutingModule
   ],
-  declarations: [PrintBulletin2Page]
+  declarations: [EmployeeModalPage]
 })
-export class PrintBulletin2PageModule {}
+export class EmployeeModalPageModule {}

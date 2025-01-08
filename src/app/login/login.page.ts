@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-inferrable-types */
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable @typescript-eslint/dot-notation */
@@ -51,7 +54,7 @@ export class LoginPage implements OnInit {
         }
 
       }
-    )
+    );
     console.log('Chargement des données...');
     nabysyGSrv.loadAppInfosFromAPI().then(
       ()=>{
@@ -84,7 +87,8 @@ export class LoginPage implements OnInit {
       this.http.get(apiUrl).subscribe(async data => {
        console.log(data['Extra']);
        if (data['OK'] !== 0) {
-          environment.tokenUser=data['Extra'] ;
+          // environment.tokenUser=data['Extra'] ;
+          localStorage.setItem('nabysy_token',data['Extra']);
           //Recup info de l'utilisateur connecté
           await this.getInfosUtilisateur();
 

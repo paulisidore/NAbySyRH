@@ -63,7 +63,8 @@ export class AffectationPage implements OnInit {
       }
     });
     this.loadingService.presentLoading();
-      this.http.get(environment.endPoint+'affectation_action.php?Action=GET_AFFECTATION&&Token='+environment.tokenUser).subscribe(res => {
+      this.http.get(environment.endPoint+'affectation_action.php?Action=GET_AFFECTATION&&Token='+
+        localStorage.getItem('nabysy_token')).subscribe(res => {
       this.listeAffectation = res;
       console.log('listeAffectation =',this.listeAffectation);
       // this.data=res ;
@@ -124,10 +125,10 @@ affectationMethode(){
 
   affecterUnePersonne(idPersonne,afficherTost=true){
     let apiUrl=environment.endPoint+'employe_action.php?Action=AFFECTER_EMPLOYE&IdEmploye='+
-    idPersonne+'&IdDirection='+this.idDirection+'&Token='+environment.tokenUser;
+    idPersonne+'&IdDirection='+this.idDirection+'&Token='+localStorage.getItem('nabysy_token');
     if (this.idService > 0){
       apiUrl=environment.endPoint+'employe_action.php?Action=AFFECTER_EMPLOYE&IdEmploye='+
-      idPersonne+'&IdService='+this.idService+'&Token='+environment.tokenUser;
+      idPersonne+'&IdService='+this.idService+'&Token='+localStorage.getItem('nabysy_token');
     }
 
     // this.url=environment.endPoint+'service_action.php?Action=GET_SERVICE&IdDirection='+this.direction.ID;

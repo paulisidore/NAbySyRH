@@ -132,7 +132,7 @@ export class AbsencePage implements OnInit {
     }
     this.loadingService.presentLoading();
     this.readAPI(environment.endPoint+'calendrier_action.php?Action=GET_ABSENCE'+datedebut+datefin+absencepaye+this.pourtous
-    +IdEmploye+'&Token='+environment.tokenUser)
+    +IdEmploye+'&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       this.loadingService.dismiss();
       // console.log(Listes);
@@ -194,7 +194,7 @@ export class AbsencePage implements OnInit {
             headers.append('Accept', 'application/json');
             headers.append('Content-Type', 'application/json' );
             const apiUrl=environment.endPoint+'calendrier_action.php?Action=SUPPRIMER_ABSENCE&IDABSENCE='+
-            absence.ID+'&Token='+environment.tokenUser;
+            absence.ID+'&Token='+localStorage.getItem('nabysy_token');
             console.log(apiUrl);
             this.http.get(apiUrl).subscribe(async data =>{
               console.log(data);
@@ -318,7 +318,7 @@ export class AbsencePage implements OnInit {
 
   //  Employe
   loadEmploye(){
-    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+environment.tokenUser)
+    this.readAPI(environment.endPoint+'employe_action.php?Action=GET_EMPLOYE&Token='+localStorage.getItem('nabysy_token'))
     .subscribe((listes) =>{
       // console.log(Listes);
       this.listeEmploye=listes ;

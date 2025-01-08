@@ -21,9 +21,10 @@ export class HomePage implements OnInit {
     {id: 1, name: 'ADMINISTRATION', src: 'assets/office (1).png', background: 'rgba(27, 150, 181, 0.1)', page: '/administration'},
     {id: 2, name: 'PERSONNEL', src: 'assets/man.png',background: 'rgba(106, 100, 255, 0.1)', page: '/personnel'},
     {id: 3, name: 'AFFECTATION', src: 'assets/send.png',background: 'rgba(255, 196, 9, 0.1)', page: '/affectation'},
-    {id: 4, name: 'SALAIRE', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/salaires'},
-    {id: 5, name: 'PRIME', src: 'assets/indemnity.png',background: 'rgba(27, 150, 181, 0.1)', page: '/prime'},
-    {id: 6, name: 'CALENDRIER ABSENCE', src: 'assets/schedule.png',background: 'rgba(27, 150, 181, 0.1)', page: '/absence'},
+    {id: 4, name: 'SALAIRE', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/list-salaires'},
+    {id: 5, name: 'Paiement', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/paiement-salaire'},
+    {id: 6, name: 'PRIME', src: 'assets/indemnity.png',background: 'rgba(27, 150, 181, 0.1)', page: '/prime'},
+    {id: 7, name: 'CALENDRIER ABSENCE', src: 'assets/schedule.png',background: 'rgba(27, 150, 181, 0.1)', page: '/absence'},
   ];
   // features2: any[]=[
   //   {id: 1, name: 'Top Up', src: 'assets/top-up.png', background: 'rgba(27, 150, 181, 0.1)', page: ''},
@@ -114,7 +115,7 @@ export class HomePage implements OnInit {
     }
     rapportRecent(){
         this.loadingService.presentLoading();
-        this.readAPI(environment.endPoint+'rs_action.php?Action=GET_RAPPORT_RS&Token='+environment.tokenUser)
+        this.readAPI(environment.endPoint+'rs_action.php?Action=GET_RAPPORT_RS&Token='+localStorage.getItem('nabysy_token'))
         .subscribe((listes) =>{
           // console.log(Listes);
           this.listeRapports=listes ;
