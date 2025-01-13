@@ -345,4 +345,7 @@ export class PaiementSalairePage implements OnInit {
   allCheckboxDisabled(): boolean {
     return this.listeEmploye.every((user) => user.SALAIRE.SALAIRE_NET <= 0);
   }
+  getTotalNetSalary(): number {
+    return this.selectedEmployees.reduce((total, employee) => total + (employee.SALAIRE?.SALAIRE_NET || 0), 0);
+  }
 }
