@@ -38,7 +38,7 @@ export class PaiementSalairePage implements OnInit {
   modes = ['date', 'month', 'month-year', 'year'];
   selectedMode = 'date';
   showPicker = false;
-  dateValue = format(new Date(), 'yyyy-MMMM');
+  dateValue = format(new Date(), 'yyyy-MM-dd');
   dateValue2 = format(new Date(), 'yyyy-MM-dd');
   formattedString = '';
   formattedString2 = '';
@@ -78,8 +78,7 @@ export class PaiementSalairePage implements OnInit {
   }
 
   setToday() {
-    // this.formattedString= format(parseISO(format(new Date(), 'yyyy-MM-dd')+ 'T09:00:00.000Z'), 'HH:mm, MMM d, yyyy');
-    // this.formattedString= format(parseISO(format(new Date(), 'yyyy-MM-dd')+ 'T09:00:00.000Z'), ' yyyy-MM-d ');
+    this.dateValue = format(new Date(), 'yyyy-MM-dd');
     this.formattedString = format(
       parseISO(format(new Date(), 'yyyy-MM-dd') + 'T09:00:00.000Z'),
       ' yyyy-MMMM '
@@ -110,6 +109,7 @@ export class PaiementSalairePage implements OnInit {
     console.log(this.selectedMonth);
     this.selectedYear = format(parseISO(this.selectedDate), 'yyyy');
     console.log(this.selectedYear);
+    this.loadEmploye();
   }
   effacedateDebut() {
     this.datetime.cancel(true);
@@ -121,107 +121,6 @@ export class PaiementSalairePage implements OnInit {
     this.selectedDate2 = '';
     this.formattedString2 = '';
   }
-
-  /* validatePayment() {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'You won\'t be able to revert this!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'Success!',
-          text: 'Vos paiements ont bien été effectués.',
-          icon: 'success',
-        });
-        console.log(
-          'Employés sélectionnés pour le paiement :',
-          this.selectedEmployees
-        );
-        console.log(this.selectedMonth);
-        console.log(this.selectedYear);
-        console.log(this.noteModePaiement);
-        let IdEmploye = '';
-        if (this.id) {
-          IdEmploye = '&IDEMPLOYE=' + this.id;
-          console.log(IdEmploye);
-        }
-        this.loadingService.presentLoading();
-        this.readAPI(
-          environment.endPoint +
-            'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
-            this.selectedMonth +
-            '&ANNEE=' +
-            this.selectedYear +
-            IdEmploye +
-            '&NOTE_MODEPAIEMENT=' +
-            this.noteModePaiement +
-            '&Token=' +
-            environment.tokenUser
-        ).subscribe((listes) => {
-          this.loadingService.dismiss();
-          // console.log(Listes);
-          this.listePrime = listes;
-          console.log(this.listePrime);
-        });
-      }
-    });
-  } */
-
-  /* validatePayment() {
-    const token = localStorage.getItem('nabysy_token');
-    if (!token) {
-      console.error('Token not found');
-      return; // Arrêter l'exécution si le token est absent
-    }
-    let IdEmploye = '';
-    if (this.id) {
-      IdEmploye = '&IDEMPLOYE=' + this.id;
-      console.log(IdEmploye);
-    }
-    this.alertctrl
-      .create({
-        header: 'Suppresion',
-        message:
-          'voulez vous effectuer le paiement des salaires des employés ?',
-        buttons: [
-          {
-            text: 'oui',
-            handler: () =>
-              new Promise(() => {
-                this.loadingService.presentLoading();
-                const headers = new Headers();
-                headers.append('Accept', 'application/json');
-                headers.append('Content-Type', 'application/json');
-                const apiUrl =
-                  environment.endPoint +
-                  'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
-                  this.selectedMonth +
-                  '&ANNEE=' +
-                  this.selectedYear +
-                  IdEmploye +
-                  '&NOTE_MODEPAIEMENT=' +
-                  this.noteModePaiement +
-                  '&Token=' +
-                  token;
-                console.log(apiUrl);
-                this.http.get(apiUrl).subscribe((listes) => {
-                  this.loadingService.dismiss();
-                  // console.log(Listes);
-                  this.listePrime = listes;
-                  console.log(this.listePrime);
-                });
-              }),
-          },
-          { text: 'NON' },
-        ],
-      })
-      .then((alertE1) => alertE1.present());
-  } */
 
   async validatePayment() {
     const token = localStorage.getItem('nabysy_token');
@@ -254,29 +153,35 @@ export class PaiementSalairePage implements OnInit {
 
   // Fonction pour démarrer le processus de paiement
   async startPaymentProcess(token: string) {
-    this.isProcessing = true; // Le traitement commence
-    this.progress = 0; // Initialiser la progression à 0%
+    this.isProcessing = true;
+    this.progress = 0;
 
-    // Afficher un alert avec la barre de progression
     const alert = await this.alertctrl.create({
       header: 'Traitement en cours',
       message: 'Paiement des salaires en cours...',
       buttons: [],
-      backdropDismiss: false, // Empêcher la fermeture de l'alerte pendant le traitement
+      backdropDismiss: false,
       cssClass: 'progress-alert',
     });
 
     await alert.present();
 
-    // Nombre total d'employés sélectionnés
     const totalEmployees = this.selectedEmployees.length;
-    let processedEmployees = 0; // Compteur des employés traités
+    let processedEmployees = 0;
 
-    // Simuler un traitement pour chaque employé
     for (let i = 0; i < totalEmployees; i++) {
       const employee = this.selectedEmployees[i];
-      let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
 
+      if (employee.SALAIRE.SALAIRE_NET <= 0) {
+        employee.status = 'paiement effectué'; // Statut automatique
+        console.log(
+          `Paiement automatique pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM} (Salaire Net <= 0)`
+        );
+        processedEmployees++;
+        continue; // Passer à l'employé suivant
+      }
+
+      let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
       const apiUrl =
         environment.endPoint +
         'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
@@ -290,76 +195,33 @@ export class PaiementSalairePage implements OnInit {
         token;
 
       try {
-        await this.http.get(apiUrl).toPromise(); // Attendre la réponse de l'API
-        processedEmployees++; // Incrémenter le compteur des employés traités
-
-        // Mettre à jour la barre de progression
-        this.progress = processedEmployees / totalEmployees;
-
-        // Mettre à jour le message de l'alerte avec la progression
-        alert.message = `Traitement de ${processedEmployees} sur ${totalEmployees} employés (${processedEmployees}/${totalEmployees})...`;
-
-        // Mettre à jour la barre de progression dans l'alerte
-        const progressBar = alert.querySelector('ion-progress-bar');
-        if (progressBar) {
-          progressBar.setAttribute('value', this.progress.toString());
-        }
+        await this.http.get(apiUrl).toPromise();
+        employee.status = 'succès'; // Paiement réussi
+        console.log(
+          `Paiement réussi pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`
+        );
+        processedEmployees++;
       } catch (error) {
-        console.error('Erreur de paiement:', error);
-        break; // Sortir de la boucle si une erreur se produit
+        console.error(
+          `Erreur de paiement pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}:`,
+          error
+        );
+        employee.status = 'échec'; // Paiement échoué
       }
+
+      this.progress = processedEmployees / totalEmployees;
+      alert.message = `Traitement de ${processedEmployees} sur ${totalEmployees} employés...`;
     }
 
-    // Fermer l'alerte lorsque tous les employés sont traités
     this.isProcessing = false;
-    alert.message = `Tous les paiements ont été effectués avec succès (${totalEmployees}/${totalEmployees})!`;
-    this.progress = 1;
+    alert.message = `Paiement terminé. ${totalEmployees} employés traités.`;
     setTimeout(() => {
-      alert.dismiss(); // Fermer l'alerte après 2 secondes
+      alert.dismiss();
     }, 2000);
   }
 
   readAPI(url: string) {
     return this.http.get(url);
-  }
-  loadEmploye() {
-    this.loadingService.presentLoading();
-    // Vérification du token dans le localStorage
-    const token = localStorage.getItem('nabysy_token');
-    if (!token) {
-      console.error('Token not found');
-      return; // Arrêter l'exécution si le token est absent
-    }
-
-    const URL =
-      environment.endPoint +
-      'salaire_action.php?Action=GET_BULLETIN_LIST&MOIS=' +
-      this.selectedMonth +
-      '&ANNEE=' +
-      this.selectedYear +
-      '&Token=' +
-      token;
-
-    console.log(URL);
-
-    this.readAPI(URL).subscribe((listes: any) => {
-      // Traitement des données renvoyées par l'API
-      this.listeEmploye = listes; // Liste complète des employés
-      this.users = listes; // Utilisation de cette liste pour la recherche et le filtrage
-
-      console.log(this.users);
-      console.log(this.listeEmploye);
-      this.loadingService.dismiss();
-
-      // Ajouter la propriété `selected` à chaque employé pour la gestion de la sélection
-      this.listeEmploye = this.listeEmploye.map((user) => ({
-        ...user,
-        selected: true, // Par défaut, tous les employés ne sont pas sélectionnés
-      }));
-
-      this.selectedEmployees = [...this.listeEmploye]; // Ajouter tous les employés à la sélection par défaut
-      this.selectAll = true; // Activer "Select All" par défaut
-    });
   }
 
   _openSideNav() {
@@ -374,6 +236,41 @@ export class PaiementSalairePage implements OnInit {
 
   openFromCode() {
     this.selectComponent.open();
+  }
+  loadEmploye() {
+    this.loadingService.presentLoading();
+    const token = localStorage.getItem('nabysy_token');
+    if (!token) {
+      console.error('Token not found');
+      return;
+    }
+
+    const URL =
+      environment.endPoint +
+      'salaire_action.php?Action=GET_BULLETIN_LIST&MOIS=' +
+      this.selectedMonth +
+      '&ANNEE=' +
+      this.selectedYear +
+      '&Token=' +
+      token;
+
+    console.log(URL);
+
+    this.readAPI(URL).subscribe((listes: any) => {
+      this.listeEmploye = listes.map((user) => ({
+        ...user,
+        selected: user.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
+        status: user.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
+      }));
+
+      this.users = [...this.listeEmploye];
+      this.selectedEmployees = this.listeEmploye.filter(
+        (user) => user.SALAIRE.SALAIRE_NET > 0
+      );
+      this.selectAll =
+        this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
+      this.loadingService.dismiss();
+    });
   }
 
   // Confirmation de la sélection
@@ -398,91 +295,54 @@ export class PaiementSalairePage implements OnInit {
     }
   }
 
-  // Fonction de filtrage des employés
-  filterEmployees() {
-    if (this.searchTerm.trim() === '') {
-      this.filteredEmployees = [...this.listeEmploye]; // Afficher tous les employés si aucune recherche
-    } else {
-      this.filteredEmployees = this.listeEmploye.filter((user: any) =>
-        `${user.EMPLOYE.PRENOM} ${user.EMPLOYE.NOM} ${user.SALAIRE.SALAIRE_BRUT} ${user.SALAIRE.SALAIRE_NET}`
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase())
-      );
-    }
-  }
-
   // Fonction de mise à jour de la sélection
   updateSelection(user: any) {
+    if (user.SALAIRE.SALAIRE_NET <= 0) {
+      return; // Ne rien faire si l'employé a un salaire net ≤ 0
+    }
+
     if (user.selected) {
-      // Ajouter à la sélection si ce n'est pas déjà dans la liste
       if (!this.selectedEmployees.some((e) => e.IDEMPLOYE === user.IDEMPLOYE)) {
         this.selectedEmployees.push(user);
       }
     } else {
-      // Retirer de la sélection
       this.selectedEmployees = this.selectedEmployees.filter(
         (e) => e.IDEMPLOYE !== user.IDEMPLOYE
       );
     }
 
-    // Mettre à jour l'état de "Select All" en fonction de la sélection
     this.updateSelectAllState();
   }
 
   // Fonction pour gérer la sélection de tous les employés
   toggleSelectAll() {
     if (this.selectAll) {
-      // Si "Select All" est activé, sélectionner tous les employés
       this.listeEmploye.forEach((user) => {
-        user.selected = true;
+        if (user.SALAIRE.SALAIRE_NET > 0) {
+          user.selected = true;
+        }
       });
-      this.selectedEmployees = [...this.listeEmploye]; // Ajouter tous les employés à la liste des sélectionnés
+      this.selectedEmployees = this.listeEmploye.filter(
+        (user) => user.SALAIRE.SALAIRE_NET > 0
+      );
     } else {
-      // Si "Select All" est désactivé, désélectionner tous les employés
       this.listeEmploye.forEach((user) => {
         user.selected = false;
       });
-      this.selectedEmployees = []; // Vider la liste des employés sélectionnés
+      this.selectedEmployees = [];
     }
 
-    // Mettre à jour l'état de "Select All" après avoir sélectionné/désélectionné tous les employés
     this.updateSelectAllState();
   }
 
   // Fonction pour mettre à jour l'état de "Select All"
   updateSelectAllState() {
-    // Si tous les employés sont sélectionnés, activer "Select All"
-    // this.selectAll = this.listeEmploye.every((user) => user.selected);
-    if (this.listeEmploye.length !== this.selectedEmployees.length) {
-      this.selectAll = false;
-    } else {
-      this.selectAll = true;
-    }
-
-    // Si un employé est désélectionné, désactiver "Select All"
-    /* if (this.listeEmploye.some((user) => !user.selected)) {
-      this.selectAll = false;
-    } */
+    this.selectAll = this.listeEmploye
+      .filter((user) => user.SALAIRE.SALAIRE_NET > 0)
+      .every((user) => user.selected);
   }
 
-  // Ouvrir le modal et transmettre les employés déjà sélectionnés
-  /* async openEmployeeModal() {
-    const modal = await this.modalctrl.create({
-      component: EmployeeModalPage,
-      componentProps: {
-        selectedEmployees: this.selectedEmployees, // Passer les employés sélectionnés au modal
-        month: this.selectedMonth, // Passer le mois au modal
-        year: this.selectedYear, // Passer l'année au modal
-      },
-    });
-
-    modal.onDidDismiss().then((result) => {
-      if (result.data) {
-        this.selectedEmployees = result.data; // Mettre à jour la sélection des employés
-        // this.saveSelectedEmployees(); // Sauvegarder dans le localStorage
-      }
-    });
-
-    await modal.present();
-  } */
+  allCheckboxDisabled(): boolean {
+    return this.listeEmploye.every((user) => user.SALAIRE.SALAIRE_NET <= 0);
+  }
 }

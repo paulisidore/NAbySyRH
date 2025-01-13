@@ -81,3 +81,44 @@ ion-col {
   margin-top: 20px;
   height: 20px;
 }
+
+.text-done {
+  background-color: #80b9f7; /* Couleur primaire */
+  font-weight: bold;
+  color: black;
+  border-radius: 5px;
+  ion-text {
+    margin: 5px;
+  }
+}
+
+.text-paiment-success {
+  background-color: #63db7f; /* Couleur de succès */
+  font-weight: bold;
+  color: black;
+  ion-text {
+    margin: 5px;
+  }
+}
+
+.text-failed {
+  background-color: #f5717f; /* Couleur de danger */
+  font-weight: bold;
+  color: black;
+  ion-text {
+    margin: 5px;
+  }
+}
+
+ion-content {
+  --overflow: scroll; /* Assurez-vous que le contenu peut défiler */
+}
+
+.sticky-button {
+  position: fixed;
+  top: 100px;
+  right: 20px; /* Positionnez-le en bas à droite */
+  z-index: 100;
+}
+
+
