@@ -4,7 +4,7 @@ export const environment = {
   passWord: '',
   appInfo: null,
   userProfile: null,
-  endPoint:'https://cloud-549579568.onetsolutions.network/nabysyrhrs/',
+  endPoint:'https://kssv.homeip.net/nabysyrhrs/',
   //endPoint:'https://technoweb.homeip.net/nabysyrhrs/',
   employeConnecte: null,
   tokenUser:''
