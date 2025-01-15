@@ -1,10 +1,31 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-button fill="clear" slot="start" color="dark" (click)="_openSideNav()">
-      <ion-icon slot="icon-only" name="menu"> </ion-icon>
-    </ion-button>
-    <ion-title>Paiement Salaire</ion-title>
-  </ion-toolbar>
+  <ion-row>
+    <ion-col size="9">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button
+            fill="clear"
+            slot="start"
+            color="dark"
+            (click)="_openSideNav()"
+          >
+            <ion-icon slot="icon-only" name="menu"> </ion-icon>
+          </ion-button>
+          <ion-title>Paiement Salaire</ion-title>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-col>
+    <ion-col size="3">
+      <ion-button
+        (click)="validatePayment()"
+        color="success"
+        expand="block"
+        [disabled]="!selectedEmployees || selectedEmployees.length === 0"
+      >
+        Valider le paiement
+      </ion-button>
+    </ion-col>
+  </ion-row>
 </ion-header>
 
 <ion-content>
@@ -14,12 +35,7 @@
   </ion-refresher>
   <!-- ***************************** -->
 
-  <ion-progress-bar
-    color="primary"
-    *ngIf="isProcessing"
-    [value]="progress"
-    >
-    
+  <ion-progress-bar color="primary" *ngIf="isProcessing" [value]="progress">
   </ion-progress-bar>
 
   <!-- ***************************** -->
@@ -89,24 +105,23 @@
           </ion-modal>
         </ion-col>
         <ion-col size="4">
-          <ion-item>
-            <ion-label position="floating">Note mode de Paiement</ion-label>
-            <ion-input
-              type="text" 
+          <ion-item style="border: 1px solid #000">
+            <ion-label>Note mode de Paiement:</ion-label>
+            <ion-textarea
+              type="text"
               name="noteModePaiement"
               [(ngModel)]="noteModePaiement"
-            ></ion-input>
+            ></ion-textarea>
           </ion-item>
-        </ion-col>        
-        <ion-col size="4" class="ion-justify-content-center" id="">
-          <ion-button
-            (click)="validatePayment()"
-            color="success"
-            expand="block"
-            [disabled]="!selectedEmployees || selectedEmployees.length === 0"
-          >
-            Valider le paiement
-          </ion-button>
+        </ion-col>
+        <ion-col
+          size="4"
+          class="ion-justify-content-center sticky-button"
+          id=""
+        >
+          <h3>
+            Total Salaires Nets : {{ getTotalNetSalary() | currency:'XOF' }}
+          </h3>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -117,7 +132,6 @@
     <ion-input
       [(ngModel)]="searchTerm"
       placeholder="Nom ou Fonction"
-      (ionInput)="filterEmployees()"
     ></ion-input>
   </ion-item>
 
@@ -130,18 +144,21 @@
     <ion-row class="table-header">
       <ion-col size="1">
         <ion-checkbox
-          *ngIf="this.listeEmploye.length===this.selectedEmployees.length"
+          *ngIf="this.listeEmploye.length === this.selectedEmployees.length"
           [(ngModel)]="selectAll"
           (ionChange)="toggleSelectAll()"
+          [disabled]="allCheckboxDisabled()"
         ></ion-checkbox>
         <ion-checkbox
-          *ngIf="this.listeEmploye.length!==this.selectedEmployees.length"
+          *ngIf="this.listeEmploye.length !== this.selectedEmployees.length"
           [(ngModel)]="selectAll"
           (ionChange)="toggleSelectAll()"
+          [disabled]="allCheckboxDisabled()"
         ></ion-checkbox>
       </ion-col>
       <ion-col size="1">ID</ion-col>
-      <ion-col size="4">Nom</ion-col>
+      <ion-col size="1.5">Statut</ion-col>
+      <ion-col size="2.5">Nom</ion-col>
       <ion-col size="2">Salaire Brut</ion-col>
       <ion-col size="2">Salaire Net</ion-col>
       <ion-col size="2">Total Retenu</ion-col>
@@ -153,19 +170,30 @@
       class="table-row"
     >
       <ion-col size="1">
+        <!-- Désactiver si Salaire Net <= 0 -->
         <ion-checkbox
           [(ngModel)]="user.selected"
           (ionChange)="updateSelection(user)"
+          [disabled]="user.SALAIRE.SALAIRE_NET <= 0"
         ></ion-checkbox>
       </ion-col>
       <ion-col size="1">{{ user.IDEMPLOYE }}</ion-col>
-      <ion-col size="4"
-        >{{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}</ion-col
+      <ion-col size="1.5"
+        ><span
+          [ngClass]="{
+          'text-done': user.status === 'paiement effectué',
+          'text-paiment-success': user.status === 'succès',
+          'text-failed': user.status === 'échec'
+        }"
+          ><ion-text> {{ user.status }} </ion-text>
+        </span></ion-col
       >
+      <ion-col size="2.5">
+        {{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}
+      </ion-col>
       <ion-col size="2">{{ user.SALAIRE.SALAIRE_BRUT }}</ion-col>
       <ion-col size="2">{{ user.SALAIRE.SALAIRE_NET }}</ion-col>
       <ion-col size="2">{{ user.SALAIRE.TOTAL_RETENU }}</ion-col>
     </ion-row>
   </ion-grid>
-
 </ion-content>
