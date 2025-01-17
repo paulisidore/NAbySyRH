@@ -60,14 +60,17 @@ export class AppComponent {
     //console.log(this.userInfo);
   }
 
-  closeMenu(){
+  closeMenu(logOutSession: boolean = false){
     if (environment.employeConnecte){
-      this.nomEmploye=environment.employeConnecte.Nom ;
-      this.prenomEmploye=environment.employeConnecte.Prenom ;
-      this.photoUrl=environment.employeConnecte.PHOTO_URL ;
-      this.employeFonction=environment.employeConnecte.Fonction ;
-      this.userInfo=environment.employeConnecte ;
-      localStorage.removeItem('nabysy_token');
+      if (logOutSession){
+        console.log('Fermeture de session.');
+        this.nomEmploye=environment.employeConnecte.Nom ;
+        this.prenomEmploye=environment.employeConnecte.Prenom ;
+        this.photoUrl=environment.employeConnecte.PHOTO_URL ;
+        this.employeFonction=environment.employeConnecte.Fonction ;
+        this.userInfo=environment.employeConnecte ;
+        localStorage.removeItem('nabysy_token');
+      }
     }
     this.menu.close('menu-content');
   }

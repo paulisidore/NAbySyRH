@@ -53,7 +53,7 @@ export class HomePage implements OnInit {
       this.prenomEmploye='';
       this.employeFonction='';
       console.log('Construtor du HomePage');
-      this.getInfosUtilisateur();
+      //this.getInfosUtilisateur();
       if (environment.employeConnecte){
         this.nomEmploye=environment.employeConnecte.Nom;
         this.prenomEmploye=environment.employeConnecte.Prenom;
@@ -110,6 +110,18 @@ export class HomePage implements OnInit {
           this.prenomEmploye=environment.employeConnecte.Prenom;
           this.employeFonction=environment.employeConnecte.Fonction ;
           this.photoUrl=environment.employeConnecte.PHOTO_URL ;
+          const token = localStorage.getItem('nabysy_token');
+          if(token){
+            //console.log('Token était pas vide dans le storage: ',token);
+            console.log('Token Précédent dans localStorage: ', environment.tokenUser);
+            console.log('Token Précédent dans environnement: ', environment.tokenUser);
+            if(environment.tokenUser !== token){
+              environment.tokenUser=token;
+            }
+          }else{
+            console.log('Le Token localStorage sera MAJ depuis celui dans environnement: ', environment.tokenUser);
+            localStorage.setItem('nabysy_token',environment.tokenUser);
+          }
         }
       });
     }
