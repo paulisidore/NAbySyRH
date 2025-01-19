@@ -20,7 +20,7 @@ import { registerLocaleData } from '@angular/common';
 import * as fr from '@angular/common/locales/fr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InertDirective } from './services/inert.directive';
-import { PaiementSalairePage } from './PAGES/paiement-salaire/paiement-salaire.page';
+import { IonicStorageModule } from '@ionic/storage-angular';
 
 
 
@@ -29,7 +29,7 @@ import { PaiementSalairePage } from './PAGES/paiement-salaire/paiement-salaire.p
 @NgModule({
   declarations: [AppComponent,  InertDirective,],
   imports: [BrowserModule,IonicModule.forRoot(),
-    HttpClientModule, AppRoutingModule, IonicSelectableModule,FormsModule,ReactiveFormsModule],
+    HttpClientModule, AppRoutingModule, IonicSelectableModule,FormsModule,ReactiveFormsModule, IonicStorageModule.forRoot()],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR'},
     ToastController,

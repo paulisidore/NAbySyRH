@@ -21,6 +21,7 @@ import { IonicSelectableModule } from 'ionic-selectable';
     IonicSelectableModule,
     Ng2SearchPipeModule,
     Ng2OrderModule,
+
   ],
   declarations: [PaiementSalairePage],
 })

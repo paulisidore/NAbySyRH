@@ -1,6 +1,6 @@
 <ion-header>
   <ion-row>
-    <ion-col size="9">
+    <ion-col size="3">
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button
@@ -14,6 +14,18 @@
           <ion-title>Paiement Salaire</ion-title>
         </ion-buttons>
       </ion-toolbar>
+    </ion-col>
+    <ion-col size="5">
+      <ion-item>
+        <ion-label>Rechercher un employé :</ion-label>
+        <ion-input
+          [(ngModel)]="searchTerm"
+          placeholder="Nom ou Fonction"
+        ></ion-input>
+      </ion-item>
+    </ion-col>
+    <ion-col size="1">
+
     </ion-col>
     <ion-col size="3">
       <ion-button
@@ -127,18 +139,18 @@
     </ion-grid>
   </div>
 
-  <ion-item>
+  <!-- <ion-item>
     <ion-label>Rechercher un employé :</ion-label>
     <ion-input
       [(ngModel)]="searchTerm"
       placeholder="Nom ou Fonction"
     ></ion-input>
-  </ion-item>
-
+  </ion-item> -->
+<ng-container *ngIf="!isLoading; else loadingTemplate">
   <!-- Tableau avec Grid -->
   <ion-grid
     class="custom-table"
-    *ngIf="listeEmploye && listeEmploye.length > 0"
+    *ngIf="listeEmploye && listeEmploye.length > 0 else loadingTemplate"
   >
     <!-- En-tête de la table avec Select All -->
     <ion-row class="table-header">
@@ -196,4 +208,14 @@
       <ion-col size="2">{{ user.SALAIRE.TOTAL_RETENU }}</ion-col>
     </ion-row>
   </ion-grid>
+</ng-container>
+
+  <!-- Template de loading -->
+  <ng-template #loadingTemplate>
+    <div class="loader-container">
+      <div class="loader"></div>
+      <p class="loader-text">Chargement des données...</p>
+    </div>
+  </ng-template>
+
 </ion-content>

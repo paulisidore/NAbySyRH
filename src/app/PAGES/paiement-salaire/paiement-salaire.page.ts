@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable prefer-const */
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import {
   AlertController,
   IonDatetime,
@@ -59,6 +59,8 @@ export class PaiementSalairePage implements OnInit {
   isProcessing = false;
   progress = 0;
 
+  isLoading = true; // Initialisé à true pour afficher le loading au début
+
   constructor(
     private http: HttpClient,
     private popupModalService: PopupModalService,
@@ -66,7 +68,7 @@ export class PaiementSalairePage implements OnInit {
     private modalctrl: ModalController,
     private service: EmployeService,
     private alertctrl: AlertController,
-    private loadingService: LoadingService
+    private loadingService: LoadingService, private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -238,10 +240,14 @@ export class PaiementSalairePage implements OnInit {
     this.selectComponent.open();
   }
   loadEmploye() {
-    this.loadingService.presentLoading();
+    // this.loadingService.presentLoading();
+    this.isLoading = true; // Activer le loading
+
     const token = localStorage.getItem('nabysy_token');
     if (!token) {
       console.error('Token not found');
+      this.loadingService.dismiss();
+      this.isLoading = false; // Activer le loading
       return;
     }
 
@@ -256,22 +262,41 @@ export class PaiementSalairePage implements OnInit {
 
     console.log(URL);
 
-    this.readAPI(URL).subscribe((listes: any) => {
-      this.listeEmploye = listes.map((user) => ({
-        ...user,
-        selected: user.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
-        status: user.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
-      }));
+    this.readAPI(URL).subscribe({
+      next: (listes: any) => {
+        this.listeEmploye = listes.map((user) => ({
+          ...user,
+          selected: user.SALAIRE.SALAIRE_NET > 0,
+          status: user.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '',
+        }));
 
-      this.users = [...this.listeEmploye];
-      this.selectedEmployees = this.listeEmploye.filter(
-        (user) => user.SALAIRE.SALAIRE_NET > 0
-      );
-      this.selectAll =
-        this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
-      this.loadingService.dismiss();
+        this.users = [...this.listeEmploye];
+        this.selectedEmployees = this.listeEmploye.filter(
+          (user) => user.SALAIRE.SALAIRE_NET > 0
+        );
+        this.selectAll =
+          this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
+
+        console.log('Employés chargés :', this.listeEmploye);
+
+        // Forcer la mise à jour du DOM
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.loadingService.dismiss();
+          this.isLoading = false; // Activer le loading
+        }, 300); // Ajustez le délai si nécessaire
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des employés :', err);
+        this.loadingService.dismiss();
+        this.isLoading = false; // Activer le loading
+      },
     });
   }
+
+
+
 
   // Confirmation de la sélection
   confirmSelection() {

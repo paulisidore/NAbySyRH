@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -16,6 +17,7 @@ const routes: Routes = [
     path: 'home',
     loadChildren: () =>
       import('./PAGES/home/home.module').then((m) => m.HomePageModule),
+    canActivate: [AuthGuard],
   },
   /*  {
     path: 'home',
@@ -27,11 +29,13 @@ const routes: Routes = [
       import('./PAGES/personnel/personnel.module').then(
         (m) => m.PersonnelPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'absence',
     loadChildren: () =>
       import('./PAGES/absence/absence.module').then((m) => m.AbsencePageModule),
+    canActivate: [AuthGuard],
   },
   {
     path: 'affectation',
@@ -39,6 +43,7 @@ const routes: Routes = [
       import('./PAGES/affectation/affectation.module').then(
         (m) => m.AffectationPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'direction',
@@ -46,6 +51,7 @@ const routes: Routes = [
       import('./PAGES/direction/direction.module').then(
         (m) => m.DirectionPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'liste-services',
@@ -53,6 +59,7 @@ const routes: Routes = [
       import('./PAGES/liste-services/liste-services.module').then(
         (m) => m.ListeServicesPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'services',
@@ -60,6 +67,7 @@ const routes: Routes = [
       import('./PAGES/services/services.module').then(
         (m) => m.ServicesPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'administration',
@@ -67,11 +75,13 @@ const routes: Routes = [
       import('./PAGES/administration/administration.module').then(
         (m) => m.AdministrationPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'prime',
     loadChildren: () =>
       import('./PAGES/prime/prime.module').then((m) => m.PrimePageModule),
+    canActivate: [AuthGuard],
   },
   {
     path: 'salaires',
@@ -79,6 +89,7 @@ const routes: Routes = [
       import('./PAGES/salaires/salaires.module').then(
         (m) => m.SalairesPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-absence',
@@ -86,6 +97,7 @@ const routes: Routes = [
       import('./CRUD/crud-absence/crud-absence.module').then(
         (m) => m.CrudAbsencePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-affectation',
@@ -93,6 +105,7 @@ const routes: Routes = [
       import('./CRUD/crud-affectation/crud-affectation.module').then(
         (m) => m.CrudAffectationPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-direction',
@@ -100,6 +113,7 @@ const routes: Routes = [
       import('./CRUD/crud-direction/crud-direction.module').then(
         (m) => m.CrudDirectionPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-employe',
@@ -107,6 +121,7 @@ const routes: Routes = [
       import('./CRUD/crud-employe/crud-employe.module').then(
         (m) => m.CrudEmployePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-service',
@@ -114,6 +129,7 @@ const routes: Routes = [
       import('./CRUD/crud-service/crud-service.module').then(
         (m) => m.CrudServicePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'detail-absence',
@@ -121,6 +137,7 @@ const routes: Routes = [
       import('./DETAIL/detail-absence/detail-absence.module').then(
         (m) => m.DetailAbsencePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'detail-affectation',
@@ -128,6 +145,7 @@ const routes: Routes = [
       import('./DETAIL/detail-affectation/detail-affectation.module').then(
         (m) => m.DetailAffectationPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'detail-employe',
@@ -135,6 +153,7 @@ const routes: Routes = [
       import('./DETAIL/detail-employe/detail-employe.module').then(
         (m) => m.DetailEmployePageModule
       ),
+      canActivate: [AuthGuard],
   },
 
   {
@@ -143,6 +162,7 @@ const routes: Routes = [
       import('./PAGES/print-bulletin2/print-bulletin2.module').then(
         (m) => m.PrintBulletin2PageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-prime',
@@ -150,6 +170,7 @@ const routes: Routes = [
       import('./CRUD/crud-prime/crud-prime.module').then(
         (m) => m.CrudPrimePageModule
       ),
+      canActivate: [AuthGuard],
   },
 
   /* {
@@ -162,6 +183,7 @@ const routes: Routes = [
       import('./CRUD/crud-sous-direction/crud-sous-direction.module').then(
         (m) => m.CrudSousDirectionPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'detail-prime',
@@ -169,6 +191,7 @@ const routes: Routes = [
       import('./DETAIL/detail-prime/detail-prime.module').then(
         (m) => m.DetailPrimePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'photoviewer',
@@ -176,11 +199,13 @@ const routes: Routes = [
       import('./DETAIL/photoviewer/photoviewer.module').then(
         (m) => m.PhotoviewerPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'avance',
     loadChildren: () =>
       import('./CRUD/avance/avance.module').then((m) => m.AvancePageModule),
+    canActivate: [AuthGuard],
   },
   {
     path: 'detail-salaire',
@@ -188,6 +213,7 @@ const routes: Routes = [
       import('./DETAIL/detail-salaire/detail-salaire.module').then(
         (m) => m.DetailSalairePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'contrat',
@@ -195,11 +221,13 @@ const routes: Routes = [
       import('./DETAIL/contrat/contrat.module').then(
         (m) => m.ContratPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'credit',
     loadChildren: () =>
       import('./PAGES/credit/credit.module').then((m) => m.CreditPageModule),
+    canActivate: [AuthGuard],
   },
   {
     path: 'crud-credit',
@@ -207,6 +235,7 @@ const routes: Routes = [
       import('./CRUD/crud-credit/crud-credit.module').then(
         (m) => m.CrudCreditPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'detail-credit',
@@ -214,6 +243,7 @@ const routes: Routes = [
       import('./DETAIL/detail-credit/detail-credit.module').then(
         (m) => m.DetailCreditPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'crud-contrat',
@@ -221,6 +251,7 @@ const routes: Routes = [
       import('./CRUD/crud-contrat/crud-contrat.module').then(
         (m) => m.CrudContratPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'acces-users',
@@ -228,6 +259,7 @@ const routes: Routes = [
       import('./CRUD/acces-users/acces-users.module').then(
         (m) => m.AccesUsersPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'niveau-acces',
@@ -235,6 +267,7 @@ const routes: Routes = [
       import('./CRUD/niveau-acces/niveau-acces.module').then(
         (m) => m.NiveauAccesPageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'paiement-salaire',
@@ -242,6 +275,7 @@ const routes: Routes = [
       import('./PAGES/paiement-salaire/paiement-salaire.module').then(
         (m) => m.PaiementSalairePageModule
       ),
+      canActivate: [AuthGuard],
   },
   {
     path: 'employee-modal',
@@ -249,10 +283,22 @@ const routes: Routes = [
       import('./CRUD/employee-modal/employee-modal.module').then(
         (m) => m.EmployeeModalPageModule
       ),
-  },  {
-    path: 'list-salaires',
-    loadChildren: () => import('./list-salaires/list-salaires.module').then( m => m.ListSalairesPageModule)
+      canActivate: [AuthGuard],
   },
+  {
+    path: 'list-salaires',
+    loadChildren: () => import('./list-salaires/list-salaires.module').then( m => m.ListSalairesPageModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'error',
+    loadChildren: () => import('./error/error.module').then( m => m.ErrorPageModule)
+  },
+  {
+    path: '**',
+    redirectTo: 'error', // Rediriger toutes les routes inconnues vers la page d'erreur
+  },
+
 
 ];
 

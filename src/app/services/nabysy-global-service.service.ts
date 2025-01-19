@@ -39,7 +39,7 @@ export class NabysyGlobalServiceService {
       //console.log(NabysyGlobalServiceService.myAppInf);
       return;
     }
-    console.log('loadAppInfosFromAPI');
+    // console.log('loadAppInfosFromAPI');
     const headers = new Headers();
     headers.append('Accept', 'application/json');
     headers.append('Content-Type', 'application/json' );
