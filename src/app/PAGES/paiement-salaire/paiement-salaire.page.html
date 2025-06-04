@@ -37,6 +37,7 @@
 
   <ion-progress-bar color="primary" *ngIf="isProcessing" [value]="progress">
   </ion-progress-bar>
+  <ion-progress-bar color="danger" type="indeterminate" *ngIf="isLoading"></ion-progress-bar>
 
   <!-- ***************************** -->
 
@@ -135,6 +136,7 @@
     ></ion-input>
   </ion-item>
 
+  <ion-progress-bar *ngIf="isLoading" type="indeterminate" style="background-color: chocolate;"></ion-progress-bar>
   <!-- Tableau avec Grid -->
   <ion-grid
     class="custom-table"
@@ -178,16 +180,22 @@
         ></ion-checkbox>
       </ion-col>
       <ion-col size="1">{{ user.IDEMPLOYE }}</ion-col>
-      <ion-col size="1.5"
-        ><span
+      <ion-col size="1.5">
+        <span
           [ngClass]="{
           'text-done': user.status === 'paiement effectué',
           'text-paiment-success': user.status === 'succès',
-          'text-failed': user.status === 'échec'
-        }"
-          ><ion-text> {{ user.status }} </ion-text>
-        </span></ion-col
-      >
+          'text-failed': user.status === 'échec'}"
+        >
+          <ion-text> {{ user.status }} </ion-text>
+          <ion-button size="small" shape="round" color="warning" *ngIf="user.status ==='échec'" id={{user.IDEMPLOYE}}><ion-icon slot="icon-only" name="warning"></ion-icon></ion-button>
+          <ion-popover  *ngIf="user.status ==='échec'" trigger={{user.IDEMPLOYE}} triggerAction="click" side="right" alignment="end">
+            <ng-template>
+              <ion-content class="ion-padding">{{user.TxErreur}}</ion-content>
+            </ng-template>
+          </ion-popover>
+        </span>
+      </ion-col>
       <ion-col size="2.5">
         {{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}
       </ion-col>

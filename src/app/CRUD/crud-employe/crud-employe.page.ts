@@ -17,6 +17,7 @@ import { IonDatetime } from '@ionic/angular';
 import { FormBuilder } from '@angular/forms';
 import { AccesUsersPage } from '../acces-users/acces-users.page';
 import { NiveauAccesPage } from '../niveau-acces/niveau-acces.page';
+import { CommonKssvServiceService, xLBoutique } from 'src/app/services/common-kssv-service.service';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class CrudEmployePage implements OnInit {
   CSS_TAUX_ALLOCFAMILLE_PATRONAL: number;CSS_TAUX_ACCIDENT_PATRONAL: number;CFCE_TAUX_PATRONAL: number;IPRES_TAUXCOMPLCADRE_E: number;
   IPRES_TAUXCOMPLCADRE_P: number;
   CAN_IGNORE_POINTAGE: number;
-
+  listeBoutiqueKSSV: xLBoutique[] = [];
   /*
   **DATE TIME
   */
@@ -55,10 +56,12 @@ export class CrudEmployePage implements OnInit {
 
   constructor(private modalctrl: ModalController,private route: ActivatedRoute,private loadingService: LoadingService,
     private http: HttpClient, public photoService: PhotoService, private formBuilder: FormBuilder,private platform: Platform,
-    private toastctrl: ToastController,private popupModalService: PopupModalService,private router: Router) {
+    private toastctrl: ToastController,private popupModalService: PopupModalService,private router: Router,
+    private kssvSrv: CommonKssvServiceService) {
       this.refreshEmploye();
       this.loadDirection();
       this.loadService();
+      this.loadBoutiqueKSSV();
       // console.log(this.employe.IdService);
      }
 
@@ -155,7 +158,7 @@ export class CrudEmployePage implements OnInit {
         '&CSS_TAUX_ALLOCFAMILLE_PATRONAL='+this.CSS_TAUX_ALLOCFAMILLE_PATRONAL+'&CSS_TAUX_ACCIDENT_PATRONAL='+this.CSS_TAUX_ACCIDENT_PATRONAL+
         '&CFCE_TAUX_PATRONAL='+this.CFCE_TAUX_PATRONAL+'&IPRES_TAUXCOMPLCADRE_E='+this.IPRES_TAUXCOMPLCADRE_E+
         '&IPRES_TAUXCOMPLCADRE_P='+this.IPRES_TAUXCOMPLCADRE_P+'&SITUATION_FAMILLE='+this.SITUATION_FAMILLE+
-        '&CAN_IGNORE_POINTAGE='+this.employe.CAN_IGNORE_POINTAGE+
+        '&CAN_IGNORE_POINTAGE='+this.employe.CAN_IGNORE_POINTAGE+'&IDBOUTIQUE='+this.employe.IDBOUTIQUE+
         '&Token='+environment.tokenUser;
         // ---------------
         console.log(apiUrl);
@@ -266,10 +269,21 @@ export class CrudEmployePage implements OnInit {
       });
     });
   }
+
+  loadBoutiqueKSSV(){
+    this.kssvSrv.getListeBoutiques().then((data: xLBoutique[]) => {
+      this.listeBoutiqueKSSV = data;
+      console.log('Liste Boutique reçus: ',this.listeBoutiqueKSSV);
+    }).catch(err => {
+      console.error('Erreur lors du chargement des boutiques KSSV', err);
+    });
+  }
+
   doRefresh(event){
     this.refreshEmploye();
     this.loadDirection();
     this.loadService();
+    this.loadBoutiqueKSSV();
     event.target.complete();
   }
 

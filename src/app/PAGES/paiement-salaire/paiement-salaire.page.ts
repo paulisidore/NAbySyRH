@@ -1,3 +1,4 @@
+import { IKSSVTransactionSalaire, PaiementService } from './../../services/paiement.service';
 /* eslint-disable @typescript-eslint/adjacent-overload-signatures */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-inferrable-types */
@@ -20,6 +21,8 @@ import { format, parseISO } from 'date-fns';
 import { IonicSelectableComponent } from 'ionic-selectable';
 import Swal from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
+import { firstValueFrom } from 'rxjs';
+import { IApiNotification } from 'src/app/services/apireponse-structure.service';
 
 @Component({
   selector: 'app-paiement-salaire',
@@ -58,6 +61,7 @@ export class PaiementSalairePage implements OnInit {
   noteModePaiement: string;
   isProcessing = false;
   progress = 0;
+  isLoading: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -66,7 +70,8 @@ export class PaiementSalairePage implements OnInit {
     private modalctrl: ModalController,
     private service: EmployeService,
     private alertctrl: AlertController,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private paiementSrv: PaiementService
   ) {}
 
   ngOnInit() {
@@ -171,7 +176,6 @@ export class PaiementSalairePage implements OnInit {
 
     for (let i = 0; i < totalEmployees; i++) {
       const employee = this.selectedEmployees[i];
-
       if (employee.SALAIRE.SALAIRE_NET <= 0) {
         employee.status = 'paiement effectué'; // Statut automatique
         console.log(
@@ -193,22 +197,68 @@ export class PaiementSalairePage implements OnInit {
         this.noteModePaiement +
         '&Token=' +
         token;
+      console.log(`Envoie du paiement de l'employé: ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`, employee);
+      console.log('Montant:', -1*employee.SALAIRE.SALAIRE_NET);
 
       try {
-        await this.http.get(apiUrl).toPromise();
-        employee.status = 'succès'; // Paiement réussi
-        console.log(
-          `Paiement réussi pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`
-        );
-        processedEmployees++;
+        //await this.http.get(apiUrl).toPromise();
+        const donnee = await firstValueFrom(this.http.get(apiUrl)) ;
+        const repo: IApiNotification = donnee as IApiNotification;
+        console.log('Réponse de l\'API:', repo);
+        if(repo && repo.OK !== null && repo.OK >0){
+          employee.status = 'succès'; // Paiement réussi
+          console.log(
+            `Paiement réussi pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`
+          );
+          //On cree le debit dans mouvement compte client de la Boutique Rattachée au lieu d'affectation de l'employé
+          let trans: IKSSVTransactionSalaire = {montant: employee.SALAIRE.SALAIRE_NET,  libelle: `Salaire de `};
+          trans.libelle += `${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM} `;
+          trans.libelle += `${this.selectedMonth}/${this.selectedYear}`;
+          trans.modePayment = 'WAVE' ; // Mode de paiement par défaut
+          trans.idBoutique = employee.EMPLOYE.IDBOUTIQUE;
+          trans.montant = -1 * employee.SALAIRE.SALAIRE_NET; // Montant négatif pour un débit
+          (await this.paiementSrv.saveTransaction(trans)).subscribe((kssvrep: IApiNotification) =>{
+            if(kssvrep && kssvrep.OK !== null && kssvrep.OK >0){
+              console.log(`Transaction enregistrée avec succès pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`);
+            }else{
+              console.error(`Erreur lors de l'enregistrement de la transaction pour ${employee.EMPLOYE.PRENOM}: ` + kssvrep.TxErreur);
+            }
+          });
+        }else if(repo && repo.OK !== null && repo.OK<1){
+          console.error(
+            `Erreur de paiement pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM} :` , repo.Contenue
+          );
+          employee.status = 'échec'; // Paiement échoué
+          employee.TxErreur = repo.TxErreur; // Stocker l'erreur pour affichage
+          if(repo.Contenue){
+            if(repo.Contenue.ERREUR){
+              if(Array.isArray(repo.Contenue.ERREUR)){
+                console.log('Liste des erreurs:', repo.Contenue.ERREUR);
+                if(repo.Contenue.ERREUR.length > 0){
+                  employee.TxErreur ='';
+                }
+                repo.Contenue.ERREUR.forEach((erreur) => {
+                  employee.TxErreur += erreur.TxErreur + ' '; // Ajouter chaque erreur à TxErreur
+                });
+              }
+            }
+          }
+        }else{
+          employee.status = 'échec'; // Paiement échoué
+          employee.TxErreur = repo.TxErreur; // Stocker l'erreur pour affichage
+          console.error(
+            `Erreur de paiement pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM} : Réponse inattendue: ` + donnee
+          );
+        }
       } catch (error) {
         console.error(
           `Erreur de paiement pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}:`,
           error
         );
         employee.status = 'échec'; // Paiement échoué
+        employee.TxErreur = `${error}`; // Stocker l'erreur pour affichage
       }
-
+      processedEmployees++;
       this.progress = processedEmployees / totalEmployees;
       alert.message = `Traitement de ${processedEmployees} sur ${totalEmployees} employés...`;
     }
@@ -238,7 +288,6 @@ export class PaiementSalairePage implements OnInit {
     this.selectComponent.open();
   }
   loadEmploye() {
-    this.loadingService.presentLoading();
     const token = localStorage.getItem('nabysy_token');
     if (!token) {
       console.error('Token not found');
@@ -254,22 +303,24 @@ export class PaiementSalairePage implements OnInit {
       '&Token=' +
       token;
 
-    console.log(URL);
-
+    this.loadingService.presentLoading();
+    this.isLoading = true;
     this.readAPI(URL).subscribe((listes: any) => {
-      this.listeEmploye = listes.map((user) => ({
-        ...user,
-        selected: user.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
-        status: user.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
+      //console.log('Liste des employés:', listes);
+      this.listeEmploye = listes.map((emp) => ({
+        ...emp,
+        selected: emp.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
+        status: emp.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
+        TxErreur: '', // Initialiser le champ d'erreur
       }));
 
       this.users = [...this.listeEmploye];
       this.selectedEmployees = this.listeEmploye.filter(
-        (user) => user.SALAIRE.SALAIRE_NET > 0
+        (emp) => emp.SALAIRE.SALAIRE_NET > 0
       );
-      this.selectAll =
-        this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
+      this.selectAll = this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
       this.loadingService.dismiss();
+      this.isLoading = false;
     });
   }
 
@@ -297,6 +348,7 @@ export class PaiementSalairePage implements OnInit {
 
   // Fonction de mise à jour de la sélection
   updateSelection(user: any) {
+    //console.log('Mise à jour de la sélection pour l\'employé:', user);
     if (user.SALAIRE.SALAIRE_NET <= 0) {
       return; // Ne rien faire si l'employé a un salaire net ≤ 0
     }
@@ -323,7 +375,7 @@ export class PaiementSalairePage implements OnInit {
         }
       });
       this.selectedEmployees = this.listeEmploye.filter(
-        (user) => user.SALAIRE.SALAIRE_NET > 0
+        (emp) => emp.SALAIRE.SALAIRE_NET > 0
       );
     } else {
       this.listeEmploye.forEach((user) => {

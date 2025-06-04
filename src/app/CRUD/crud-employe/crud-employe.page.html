@@ -137,6 +137,11 @@
         <ion-select-option value="0">OUI</ion-select-option>
         <ion-select-option value="1">NON</ion-select-option>
       </ion-select></ion-chip>
+      <ion-chip color="warning">Payer le Salaire depuis la boutique: 
+        <ion-select placeholder="Sélectionnez" [(ngModel)]="employe.IDBOUTIQUE" >
+          <ion-select-option  *ngFor="let boutique of listeBoutiqueKSSV" value={{boutique.ID}}>{{boutique.NOM}}</ion-select-option>
+        </ion-select>
+      </ion-chip>
     </div>
   </div>
   <form >
