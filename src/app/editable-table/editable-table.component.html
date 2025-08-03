@@ -1,0 +1,39 @@
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <table mat-table [dataSource]="rows.controls" class="mat-elevation-z1" formArrayName="rows">
+      <!-- Nom -->
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef> Nom </th>
+        <td mat-cell *matCellDef="let row; let i = index" [formGroupName]="i">
+          <input matInput placeholder="Nom" formControlName="nom">
+        </td>
+      </ng-container>
+
+      <!-- Âge -->
+      <ng-container matColumnDef="age">
+        <th mat-header-cell *matHeaderCellDef> Âge </th>
+        <td mat-cell *matCellDef="let row; let i = index" [formGroupName]="i">
+          <input matInput type="number" placeholder="Âge" formControlName="age">
+        </td>
+      </ng-container>
+
+      <!-- Action -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let row; let i = index">
+          <button mat-icon-button color="warn" (click)="removeRow(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['nom', 'age', 'actions']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['nom', 'age', 'actions'];"></tr>
+    </table>
+
+    <ion-button expand="full" (click)="addRow()">Ajouter une ligne</ion-button>
+    <ion-button expand="full" type="submit">Valider</ion-button>
+
+  </form>
+</ion-content>
