@@ -23,8 +23,9 @@ export class HomePage implements OnInit {
     {id: 3, name: 'AFFECTATION', src: 'assets/send.png',background: 'rgba(255, 196, 9, 0.1)', page: '/affectation'},
     {id: 4, name: 'SALAIRE', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/list-salaires'},
     {id: 5, name: 'Paiement', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/paiement-salaire'},
-    {id: 6, name: 'PRIME', src: 'assets/indemnity.png',background: 'rgba(27, 150, 181, 0.1)', page: '/prime'},
-    {id: 7, name: 'CALENDRIER ABSENCE', src: 'assets/schedule.png',background: 'rgba(27, 150, 181, 0.1)', page: '/absence'},
+    {id: 6, name: 'Paiements Divers', src: 'assets/salary.png',background: 'rgba(27, 150, 181, 0.1)', page: '/paiement-vrac'},
+    {id: 7, name: 'PRIME', src: 'assets/indemnity.png',background: 'rgba(27, 150, 181, 0.1)', page: '/prime'},
+    {id: 8, name: 'CALENDRIER ABSENCE', src: 'assets/schedule.png',background: 'rgba(27, 150, 181, 0.1)', page: '/absence'},
   ];
   // features2: any[]=[
   //   {id: 1, name: 'Top Up', src: 'assets/top-up.png', background: 'rgba(27, 150, 181, 0.1)', page: ''},
