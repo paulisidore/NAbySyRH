@@ -87,7 +87,9 @@ async validatePayment(tableau: any[] = []) {
       //let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
       const apiUrl =
         environment.endPoint +
-        'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
+        'salaire_action.php?Action=PAIEMENT_DIVERS' +
+        '&LIBELLE=' +
+        employee.nom +
         '&NOTE_MODEPAIEMENT=' +
         employee.motif +
         '&Token=' +
