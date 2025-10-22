@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
@@ -105,4 +106,13 @@ export class NabysyGlobalServiceService {
     }
   }
 
+}
+
+export interface IReponseAPI {
+  Action?: string;
+  OK?: number|0|1;
+  TxErreur?: string ;
+  Extra?: any ;
+  Contenue?: any ;
+  Autre?: any ;
 }

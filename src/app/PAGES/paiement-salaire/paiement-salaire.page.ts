@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { IApiNotification } from 'src/app/services/apireponse-structure.service';
+import { CommonKssvServiceService, xLBoutique } from 'src/app/services/common-kssv-service.service';
 
 @Component({
   selector: 'app-paiement-salaire',
@@ -63,6 +64,12 @@ export class PaiementSalairePage implements OnInit {
   progress = 0;
   isLoading: boolean = false;
 
+  // Nouvelle propriété pour le mode édition
+  isEditMode: boolean = false;
+
+  listeBoutiqueKSSV: xLBoutique[] = [];
+  idBoutiqueAPayer: number = 0 ;
+
   constructor(
     private http: HttpClient,
     private popupModalService: PopupModalService,
@@ -71,15 +78,86 @@ export class PaiementSalairePage implements OnInit {
     private service: EmployeService,
     private alertctrl: AlertController,
     private loadingService: LoadingService,
-    private paiementSrv: PaiementService
+    private paiementSrv: PaiementService,
+    private kssvSrv: CommonKssvServiceService,
   ) {}
 
   ngOnInit() {
     this.setToday();
     this.today = new Date().getDate();
+    this.loadBoutiqueKSSV();
     this.loadEmploye();
-    console.log(this.selectedMonth);
-    console.log(this.selectedYear);
+    //console.log(this.selectedMonth);
+    //console.log(this.selectedYear);
+  }
+
+  loadBoutiqueKSSV(){
+    this.kssvSrv.getListeBoutiques().then((data: xLBoutique[]) => {
+      this.listeBoutiqueKSSV = data;
+      console.log('Liste Boutique reçus: ',this.listeBoutiqueKSSV);
+    }).catch(err => {
+      console.error('Erreur lors du chargement des boutiques KSSV', err);
+    });
+  }
+
+  // Nouvelle méthode pour activer/désactiver le mode édition
+  toggleEditMode() {
+    this.isEditMode = !this.isEditMode;
+    if (this.isEditMode) {
+      // Mode édition activé
+      Swal.fire({
+        icon: 'info',
+        title: 'Mode édition activé',
+        text: 'Vous pouvez maintenant modifier les montants des salaires nets',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      // Mode édition désactivé
+      Swal.fire({
+        icon: 'success',
+        title: 'Mode édition désactivé',
+        text: 'Les modifications ont été verrouillées',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  }
+
+  // Nouvelle méthode pour gérer les changements de salaire
+  onSalaryChange(user: any) {
+    if (!this.isEditMode) {
+      return;
+    }
+
+    // Valider que le montant est positif
+    if (user.SALAIRE.SALAIRE_NET < 0) {
+      user.SALAIRE.SALAIRE_NET = 0;
+      Swal.fire({
+        icon: 'warning',
+        title: 'Montant invalide',
+        text: 'Le salaire net ne peut pas être négatif',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+
+    // Mettre à jour la sélection de l'employé
+    if (user.SALAIRE.SALAIRE_NET <= 0) {
+      user.selected = false;
+      user.status = 'paiement effectué';
+      this.selectedEmployees = this.selectedEmployees.filter(
+        (e) => e.IDEMPLOYE !== user.IDEMPLOYE
+      );
+    } else {
+      user.status = '';
+      if (!this.selectedEmployees.some((e) => e.IDEMPLOYE === user.IDEMPLOYE)) {
+        user.selected = true;
+        this.selectedEmployees.push(user);
+      }
+    }
+
+    this.updateSelectAllState();
   }
 
   setToday() {
@@ -184,7 +262,12 @@ export class PaiementSalairePage implements OnInit {
         processedEmployees++;
         continue; // Passer à l'employé suivant
       }
-
+      let idBout=0;
+      let txBout='';
+      if(this.idBoutiqueAPayer>0){
+        idBout = this.idBoutiqueAPayer ;
+        txBout = '&IDBOUTIQUE='+idBout;
+      }
       let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
       const apiUrl =
         environment.endPoint +
@@ -195,6 +278,7 @@ export class PaiementSalairePage implements OnInit {
         IdEmploye +
         '&NOTE_MODEPAIEMENT=' +
         this.noteModePaiement +
+        txBout +
         '&Token=' +
         token;
       console.log(`Envoie du paiement de l'employé: ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM}`, employee);
@@ -294,12 +378,17 @@ export class PaiementSalairePage implements OnInit {
       return;
     }
 
+    let txBout='';
+    if(this.idBoutiqueAPayer>0){
+      txBout='&IDBOUTIQUE='+this.idBoutiqueAPayer ;
+    }
     const URL =
       environment.endPoint +
       'salaire_action.php?Action=GET_BULLETIN_LIST&MOIS=' +
       this.selectedMonth +
       '&ANNEE=' +
       this.selectedYear +
+      txBout +
       '&Token=' +
       token;
 

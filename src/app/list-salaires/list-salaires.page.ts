@@ -118,8 +118,9 @@ export class ListSalairesPage implements OnInit {
 
   // Segments
   segmentList: Array<string> = [
-    'PAIEMENT OU AVANCE SALAIRE',
+    'SALAIRE OU AVANCE SALAIRE',
     'HISTORIQUE DES SALAIRES',
+    'DEMANDE D\'AVANCE SALAIRE',
   ];
   selectedSegment: string;
   slideList: Array<string> = ['Slide Segment 1', 'Slide Segment 2'];

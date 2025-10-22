@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar color="warning">
+    <ion-title>{{ titreModal }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="annuler()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="demandeForm">
+    <ion-item>
+      <ion-label position="stacked">Motif <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input 
+        type="text" 
+        formControlName="motif" 
+        placeholder="Entrez le motif de la demande">
+      </ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="demandeForm.get('motif')?.invalid && demandeForm.get('motif')?.touched">
+      <small class="ion-padding-start">Le motif est requis (min. 3 caractères)</small>
+    </ion-text>
+
+    <ion-item class="ion-margin-top">
+      <ion-label position="stacked">Montant demandé <ion-text color="danger">*</ion-text></ion-label>
+      <ion-input 
+        type="number" 
+        formControlName="montant" 
+        placeholder="0">
+      </ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="demandeForm.get('montant')?.invalid && demandeForm.get('montant')?.touched">
+      <small class="ion-padding-start">Le montant doit être supérieur à 0</small>
+    </ion-text>
+  </form>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" fill="outline" color="medium" (click)="annuler()">
+          Annuler
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button 
+          expand="block" 
+          color="warning" 
+          (click)="valider()"
+          [disabled]="demandeForm.invalid">
+          {{ texteBouton }}
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

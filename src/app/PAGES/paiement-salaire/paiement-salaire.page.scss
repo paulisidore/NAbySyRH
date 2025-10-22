@@ -121,4 +121,48 @@ ion-content {
   z-index: 100;
 }
 
+// Styles pour le mode édition
+.editable-field {
+  background-color: #fff3cd; /* Couleur jaune claire pour indiquer l'édition */
+  border: 2px solid #ffc107; /* Bordure jaune */
+  border-radius: 4px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  
+  &:focus {
+    background-color: #fffaeb;
+    border-color: #ff9800;
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+  }
+}
 
+ion-input[readonly] {
+  --background: transparent;
+  --color: inherit;
+  --placeholder-opacity: 0.5;
+  cursor: default;
+  border: 1px solid transparent;
+}
+
+ion-input:not([readonly]) {
+  cursor: text;
+}
+
+// Style pour le bouton de modification
+ion-button[color="warning"] {
+  --background: #ff9800;
+  --color: white;
+  
+  ion-icon {
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
