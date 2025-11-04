@@ -6,7 +6,7 @@ import { IKSSVTransactionSalaire, PaiementService } from './../../services/paiem
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable prefer-const */
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import {
   AlertController,
   IonDatetime,
@@ -58,8 +58,9 @@ export class PaiementSalairePage implements OnInit {
   id: any;
   listePrime: any;
   listeEmploye: any[];
-  selectAll: boolean = false; // Indicateur de sélection "Select All"
-  noteModePaiement: string;
+  selectAll: boolean = false; // État de la checkbox principale
+  selectAllCheckBox: boolean = false;
+
   isProcessing = false;
   progress = 0;
   isLoading: boolean = false;
@@ -80,6 +81,7 @@ export class PaiementSalairePage implements OnInit {
     private loadingService: LoadingService,
     private paiementSrv: PaiementService,
     private kssvSrv: CommonKssvServiceService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -157,7 +159,10 @@ export class PaiementSalairePage implements OnInit {
       }
     }
 
-    this.updateSelectAllState();
+    // Mettre à jour l'état de la checkbox principale après un délai
+    setTimeout(() => {
+      this.updateSelectAllState();
+    }, 0);
   }
 
   setToday() {
@@ -234,32 +239,26 @@ export class PaiementSalairePage implements OnInit {
     await alert.present();
   }
 
-  // Fonction pour démarrer le processus de paiement
   async startPaymentProcess(token: string) {
     this.isProcessing = true;
     this.progress = 0;
 
+    // Créer une alerte pour afficher la progression
     const alert = await this.alertctrl.create({
       header: 'Traitement en cours',
-      message: 'Paiement des salaires en cours...',
-      buttons: [],
+      message: 'Traitement de 0 sur ' + this.selectedEmployees.length + ' employés...',
       backdropDismiss: false,
-      cssClass: 'progress-alert',
     });
 
     await alert.present();
 
-    const totalEmployees = this.selectedEmployees.length;
     let processedEmployees = 0;
+    const totalEmployees = this.selectedEmployees.length;
 
-    for (let i = 0; i < totalEmployees; i++) {
-      const employee = this.selectedEmployees[i];
+    for (const employee of this.selectedEmployees) {
       if (employee.SALAIRE.SALAIRE_NET <= 0) {
-        employee.status = 'paiement effectué'; // Statut automatique
-        console.log(
-          `Paiement automatique pour ${employee.EMPLOYE.PRENOM} ${employee.EMPLOYE.NOM} (Salaire Net <= 0)`
-        );
         processedEmployees++;
+        this.progress = processedEmployees / totalEmployees;
         continue; // Passer à l'employé suivant
       }
       let idBout=0;
@@ -269,6 +268,7 @@ export class PaiementSalairePage implements OnInit {
         txBout = '&IDBOUTIQUE='+idBout;
       }
       let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
+      const noteModePaiement = employee.noteModePaiement || ''; // Utiliser la note de l'employé
       const apiUrl =
         environment.endPoint +
         'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
@@ -277,7 +277,7 @@ export class PaiementSalairePage implements OnInit {
         this.selectedYear +
         IdEmploye +
         '&NOTE_MODEPAIEMENT=' +
-        this.noteModePaiement +
+        encodeURIComponent(noteModePaiement) +
         txBout +
         '&Token=' +
         token;
@@ -401,13 +401,19 @@ export class PaiementSalairePage implements OnInit {
         selected: emp.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
         status: emp.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
         TxErreur: '', // Initialiser le champ d'erreur
+        noteModePaiement: '', // Initialiser la note de paiement individuelle
       }));
 
       this.users = [...this.listeEmploye];
       this.selectedEmployees = this.listeEmploye.filter(
         (emp) => emp.SALAIRE.SALAIRE_NET > 0
       );
-      this.selectAll = this.selectedEmployees.length > 0 && !this.allCheckboxDisabled();
+
+      // Initialiser l'état de la checkbox principale
+      setTimeout(() => {
+        this.updateSelectAllState();
+      }, 0);
+
       this.loadingService.dismiss();
       this.isLoading = false;
     });
@@ -442,6 +448,8 @@ export class PaiementSalairePage implements OnInit {
       return; // Ne rien faire si l'employé a un salaire net ≤ 0
     }
 
+    // Mettre à jour la liste des employés sélectionnés
+    //console.log('Nb Emp. Selectionné: '+this.selectedEmployees.length);
     if (user.selected) {
       if (!this.selectedEmployees.some((e) => e.IDEMPLOYE === user.IDEMPLOYE)) {
         this.selectedEmployees.push(user);
@@ -450,14 +458,27 @@ export class PaiementSalairePage implements OnInit {
       this.selectedEmployees = this.selectedEmployees.filter(
         (e) => e.IDEMPLOYE !== user.IDEMPLOYE
       );
+      if(this.selectAllCheckBox){
+        console.log('SelectBOX était VRAI il passera à FAUX');
+        this.selectAllCheckBox=false;
+      }
     }
+    //console.log('Nb Emp. Selectionné: '+this.selectedEmployees.length);
+    // Mettre à jour l'état de la checkbox principale après un délai
 
-    this.updateSelectAllState();
+      setTimeout(() => {
+          this.updateSelectAllState();
+        }, 0);
+
+
   }
 
-  // Fonction pour gérer la sélection de tous les employés
-  toggleSelectAll() {
-    if (this.selectAll) {
+  // Gérer le changement de la checkbox "Tout sélectionner"
+  onSelectAllChange(event: any) {
+    const isChecked = event.detail.checked;
+
+    if (isChecked) {
+      // Sélectionner tous les employés éligibles
       this.listeEmploye.forEach((user) => {
         if (user.SALAIRE.SALAIRE_NET > 0) {
           user.selected = true;
@@ -467,20 +488,25 @@ export class PaiementSalairePage implements OnInit {
         (emp) => emp.SALAIRE.SALAIRE_NET > 0
       );
     } else {
+      // Désélectionner tous les employés
       this.listeEmploye.forEach((user) => {
         user.selected = false;
       });
       this.selectedEmployees = [];
     }
-
-    this.updateSelectAllState();
+    this.selectAll = isChecked;
   }
 
-  // Fonction pour mettre à jour l'état de "Select All"
+  // Mettre à jour l'état de la checkbox principale
   updateSelectAllState() {
-    this.selectAll = this.listeEmploye
-      .filter((user) => user.SALAIRE.SALAIRE_NET > 0)
-      .every((user) => user.selected);
+    const selectableEmployees = this.listeEmploye.filter((user) => user.SALAIRE.SALAIRE_NET > 0);
+    const employeSelectionne = selectableEmployees.filter((user) => user.selected) ;
+    const newSelectAllState = selectableEmployees.length > 0 && employeSelectionne.length === selectableEmployees.length ;
+    // Ne mettre à jour que si l'état a vraiment changé
+    if (this.selectAll !== newSelectAllState) {
+      this.selectAll = newSelectAllState;
+      this.cdr.detectChanges();
+    }
   }
 
   allCheckboxDisabled(): boolean {

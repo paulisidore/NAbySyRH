@@ -1,75 +1,23 @@
 <ion-header>
-  <ion-row>
-    <ion-col size="7">
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button
-            fill="clear"
-            slot="start"
-            color="dark"
-            (click)="_openSideNav()"
-          >
-            <ion-icon slot="icon-only" name="menu"> </ion-icon>
-          </ion-button>
-          <ion-title>Paiement Salaire</ion-title>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-col>
-    <ion-col size="2.5">
-      <ion-button
-        (click)="toggleEditMode()"
-        [color]="isEditMode ? 'warning' : 'primary'"
-        expand="block"
-      >
-        <ion-icon slot="start" [name]="isEditMode ? 'lock-open' : 'lock-closed'"></ion-icon>
-        {{ isEditMode ? 'Verrouiller' : 'Modifier Montants' }}
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button fill="clear" color="light" (click)="_openSideNav()">
+        <ion-icon slot="icon-only" name="menu"></ion-icon>
       </ion-button>
-    </ion-col>
-    <ion-col size="2.5">
-      <ion-button
-        (click)="validatePayment()"
-        color="success"
-        expand="block"
-        [disabled]="!selectedEmployees || selectedEmployees.length === 0"
-      >
-        Valider le paiement
-      </ion-button>
-    </ion-col>
-  </ion-row>
-</ion-header>
-
-<ion-content>
-  <!-- ******************** -->
-  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-  <!-- ***************************** -->
-
-  <ion-progress-bar color="primary" *ngIf="isProcessing" [value]="progress">
-  </ion-progress-bar>
-  <ion-progress-bar color="danger" type="indeterminate" *ngIf="isLoading"></ion-progress-bar>
-
-  <!-- ***************************** -->
-
-  <div class="ion-justify-content-center" id="div1">
-    <ion-grid class="ion-grid-user">
-      <ion-title class="recherche">RECHERCHE</ion-title>
-      <ion-row class="ion-justify-content-center" class="ion-row-user">
-        <ion-col size="4" class="ion-justify-content-center">
-          <!-- Date de départ -->
-          <!-- <ion-title class="depart">Date de départ <br><ion-icon name="arrow-down-outline" ></ion-icon></ion-title> -->
-          <ion-item id="open-modal">
-            <!-- <ion-icon icon="calendar-outline" slot="start" color="primary"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Gestion des Paiements de Salaires</ion-title>
+  </ion-toolbar>
+  
+  <ion-toolbar color="light">
+    <ion-grid class="header-actions">
+      <ion-row class="ion-align-items-center">
+        <ion-col size="12" size-md="4">
+          <!-- Sélection de période -->
+          <ion-item id="open-modal" lines="none" class="period-selector">
+            <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
             <ion-label>Période</ion-label>
-            <ion-text tappable slot="end"
-              >{{ formattedString| date:'MMMM yyyy' }}</ion-text
-            >
-            <ion-icon
-              icon="calendar-outline"
-              slot="end"
-              color="primary"
-              tappable
-            ></ion-icon>
+            <ion-text class="period-text">{{ formattedString | date:'MMMM yyyy' }}</ion-text>
+            <ion-icon name="chevron-down-outline" slot="end" color="medium"></ion-icon>
           </ion-item>
 
           <ion-modal trigger="open-modal" mode="md">
@@ -85,149 +33,250 @@
                   (ionCancel)="showPicker=false;"
                 >
                 </ion-datetime>
-                <ion-row>
-                  <ion-col size="4"
-                    ><ion-button
-                      (click)="close()"
-                      color="danger"
-                      class="dismiss"
-                      >Dismiss</ion-button
-                    ></ion-col
-                  >
-                  <ion-col size="4"
-                    ><ion-button
-                      (click)="effacedateDebut()"
-                      color="warning"
-                      class="dismiss"
-                      >Effacer</ion-button
-                    ></ion-col
-                  >
-                  <ion-col size="4"
-                    ><ion-button
-                      (click)="select()"
-                      color="primary"
-                      expand="block"
-                      >Select</ion-button
-                    ></ion-col
-                  >
+                <ion-row class="modal-actions">
+                  <ion-col size="4">
+                    <ion-button (click)="close()" color="danger" expand="block">
+                      Annuler
+                    </ion-button>
+                  </ion-col>
+                  <ion-col size="4">
+                    <ion-button (click)="effacedateDebut()" color="warning" expand="block">
+                      Effacer
+                    </ion-button>
+                  </ion-col>
+                  <ion-col size="4">
+                    <ion-button (click)="select()" color="primary" expand="block">
+                      Valider
+                    </ion-button>
+                  </ion-col>
                 </ion-row>
               </ion-content>
             </ng-template>
           </ion-modal>
         </ion-col>
-        <ion-col size="4">
-          <ion-item style="border: 1px solid #000">
-            <ion-label>Note mode de Paiement:</ion-label>
-            <ion-textarea
-              type="text"
-              name="noteModePaiement"
-              [(ngModel)]="noteModePaiement"
-            ></ion-textarea>
-          </ion-item>
-        </ion-col>
-        <ion-col
-          size="4"
-          class="ion-justify-content-center sticky-button"
-          id=""
-        >
-          <h3>
-            Total Salaires Nets : {{ getTotalNetSalary() | currency:'XOF' }}
-          </h3>
+
+        <ion-col size="12" size-md="8">
+          <!-- Actions principales -->
+          <div class="action-buttons">
+            <ion-button
+              (click)="toggleEditMode()"
+              [color]="isEditMode ? 'warning' : 'medium'"
+              expand="block"
+              class="edit-btn"
+            >
+              <ion-icon slot="start" [name]="isEditMode ? 'lock-open' : 'lock-closed'"></ion-icon>
+              {{ isEditMode ? 'Verrouiller' : 'Modifier' }}
+            </ion-button>
+            
+            <ion-button
+              (click)="validatePayment()"
+              color="success"
+              expand="block"
+              class="validate-btn"
+              [disabled]="!selectedEmployees || selectedEmployees.length === 0"
+            >
+              <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+              Valider le paiement
+            </ion-button>
+          </div>
         </ion-col>
       </ion-row>
     </ion-grid>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-progress-bar color="primary" *ngIf="isProcessing" [value]="progress"></ion-progress-bar>
+  <ion-progress-bar color="danger" type="indeterminate" *ngIf="isLoading"></ion-progress-bar>
+
+  <!-- Statistiques et filtres -->
+  <div class="stats-filter-section">
+    <ion-card class="stats-card">
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <div class="stat-item">
+                <ion-icon name="people-outline" color="primary"></ion-icon>
+                <div class="stat-content">
+                  <div class="stat-label">Employés sélectionnés</div>
+                  <div class="stat-value">{{ selectedEmployees?.length || 0 }}</div>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <div class="stat-item">
+                <ion-icon name="cash-outline" color="success"></ion-icon>
+                <div class="stat-content">
+                  <div class="stat-label">Total Salaires Nets</div>
+                  <div class="stat-value">{{ getTotalNetSalary() | currency:'XOF':'symbol':'1.0-0' }}</div>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Filtres -->
+    <ion-card class="filter-card">
+      <ion-card-content>
+        <ion-grid>
+          <ion-row class="ion-align-items-center">
+            <ion-col size="12" size-md="6">
+              <ion-item lines="none">
+                <ion-icon name="search-outline" slot="start" color="primary"></ion-icon>
+                <ion-input
+                  [(ngModel)]="searchTerm"
+                  placeholder="Rechercher par nom ou fonction..."
+                  clearInput
+                ></ion-input>
+              </ion-item>
+            </ion-col>
+            <ion-col size="12" size-md="6">
+              <ion-item lines="none">
+                <ion-icon name="business-outline" slot="start" color="primary"></ion-icon>
+                <ion-label>Boutique</ion-label>
+                <ion-select 
+                  placeholder="Toutes les boutiques" 
+                  [(ngModel)]="idBoutiqueAPayer" 
+                  (ngModelChange)="this.loadEmploye()"
+                  interface="popover"
+                >
+                  <ion-select-option value="0">(Toutes les Boutiques)</ion-select-option>
+                  <ion-select-option *ngFor="let boutique of listeBoutiqueKSSV" [value]="boutique.ID">
+                    {{ boutique.NOM }}
+                  </ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
   </div>
 
-  <ion-item>
-    <ion-label>Rechercher :</ion-label>
-    <ion-input
-      [(ngModel)]="searchTerm"
-      placeholder="Nom ou Fonction"
-    ></ion-input>
-    <ion-chip color="success">
-        <ion-label>Choix de la Boutique</ion-label>
-        <ion-select placeholder="Sélectionnez une Boutique" [(ngModel)]="idBoutiqueAPayer" (ngModelChange)="this.loadEmploye()" >
-          <ion-select-option  value=0>(Toutes les Boutiques)</ion-select-option>
-          <ion-select-option  *ngFor="let boutique of listeBoutiqueKSSV" value={{boutique.ID}}>{{boutique.NOM}}</ion-select-option>
-        </ion-select>
-    </ion-chip>
-  </ion-item>
+  <!-- Tableau des employés -->
+  <ion-card class="table-card" *ngIf="listeEmploye && listeEmploye.length > 0">
+    <ion-grid class="custom-table">
+      <!-- En-tête -->
+      <ion-row class="table-header">
+        <ion-col size="0.6" class="checkbox-col">
+          <!-- [checked]="selectAll" -->
+          <ion-checkbox
+            [checked]="selectAllCheckBox"
+            (ionChange)="onSelectAllChange($event)"
+            [disabled]="allCheckboxDisabled()"
+          ></ion-checkbox>
+        </ion-col>
+        <ion-col size="0.6">ID</ion-col>
+        <ion-col size="1.3">Statut</ion-col>
+        <ion-col size="2">Nom complet</ion-col>
+        <ion-col size="1.5">Salaire Brut</ion-col>
+        <ion-col size="1.5">Salaire Net</ion-col>
+        <ion-col size="1.5">Total Retenu</ion-col>
+        <ion-col size="3">Note de Paiement</ion-col>
+      </ion-row>
 
-
-  <ion-progress-bar *ngIf="isLoading" type="indeterminate" style="background-color: chocolate;"></ion-progress-bar>
-  <!-- Tableau avec Grid -->
-  <ion-grid
-    class="custom-table"
-    *ngIf="listeEmploye && listeEmploye.length > 0"
-  >
-    <!-- En-tête de la table avec Select All -->
-    <ion-row class="table-header">
-      <ion-col size="1">
-        <ion-checkbox
-          *ngIf="this.listeEmploye.length === this.selectedEmployees.length"
-          [(ngModel)]="selectAll"
-          (ionChange)="toggleSelectAll()"
-          [disabled]="allCheckboxDisabled()"
-        ></ion-checkbox>
-        <ion-checkbox
-          *ngIf="this.listeEmploye.length !== this.selectedEmployees.length"
-          [(ngModel)]="selectAll"
-          (ionChange)="toggleSelectAll()"
-          [disabled]="allCheckboxDisabled()"
-        ></ion-checkbox>
-      </ion-col>
-      <ion-col size="1">ID</ion-col>
-      <ion-col size="1.5">Statut</ion-col>
-      <ion-col size="2.5">Nom</ion-col>
-      <ion-col size="2">Salaire Brut</ion-col>
-      <ion-col size="2">Salaire Net</ion-col>
-      <ion-col size="2">Total Retenu</ion-col>
-    </ion-row>
-
-    <!-- Liste des employés -->
-    <ion-row
-      *ngFor="let user of listeEmploye | filter: searchTerm"
-      class="table-row"
-    >
-      <ion-col size="1">
-        <!-- Désactiver si Salaire Net <= 0 -->
-        <ion-checkbox
-          [(ngModel)]="user.selected"
-          (ionChange)="updateSelection(user)"
-          [disabled]="user.SALAIRE.SALAIRE_NET <= 0"
-        ></ion-checkbox>
-      </ion-col>
-      <ion-col size="1">{{ user.IDEMPLOYE }}</ion-col>
-      <ion-col size="1.5">
-        <span
-          [ngClass]="{
-          'text-done': user.status === 'paiement effectué',
-          'text-paiment-success': user.status === 'succès',
-          'text-failed': user.status === 'échec'}"
-        >
-          <ion-text> {{ user.status }} </ion-text>
-          <ion-button size="small" shape="round" color="warning" *ngIf="user.status ==='échec'" id={{user.IDEMPLOYE}}><ion-icon slot="icon-only" name="warning"></ion-icon></ion-button>
-          <ion-popover  *ngIf="user.status ==='échec'" trigger={{user.IDEMPLOYE}} triggerAction="click" side="right" alignment="end">
+      <!-- Lignes des employés -->
+      <ion-row
+        *ngFor="let user of listeEmploye | filter: searchTerm"
+        class="table-row"
+        [class.row-disabled]="user.SALAIRE.SALAIRE_NET <= 0"
+        [class.row-success]="user.status === 'succès'"
+        [class.row-error]="user.status === 'échec'"
+      >
+        <ion-col size="0.6" class="checkbox-col">
+          <ion-checkbox
+            [(ngModel)]="user.selected"
+            (ionChange)="updateSelection(user)"
+            [disabled]="user.SALAIRE.SALAIRE_NET <= 0"
+          ></ion-checkbox>
+        </ion-col>
+        <ion-col size="0.6">
+          <span class="employee-id">{{ user.IDEMPLOYE }}</span>
+        </ion-col>
+        <ion-col size="1.3">
+          <ion-badge
+            [color]="user.status === 'paiement effectué' ? 'primary' : 
+                     user.status === 'succès' ? 'success' : 
+                     user.status === 'échec' ? 'danger' : 'medium'"
+            class="status-badge"
+          >
+            {{ user.status || 'En attente' }}
+            <ion-button 
+              *ngIf="user.status === 'échec'" 
+              size="small" 
+              fill="clear" 
+              [id]="'error-' + user.IDEMPLOYE"
+              class="error-btn"
+            >
+              <ion-icon slot="icon-only" name="alert-circle-outline"></ion-icon>
+            </ion-button>
+          </ion-badge>
+          <ion-popover 
+            *ngIf="user.status === 'échec'" 
+            [trigger]="'error-' + user.IDEMPLOYE" 
+            triggerAction="click"
+            side="right"
+          >
             <ng-template>
-              <ion-content class="ion-padding">{{user.TxErreur}}</ion-content>
+              <ion-content class="error-popover">
+                <div class="error-content">
+                  <ion-icon name="warning" color="danger"></ion-icon>
+                  <p>{{ user.TxErreur }}</p>
+                </div>
+              </ion-content>
             </ng-template>
           </ion-popover>
-        </span>
-      </ion-col>
-      <ion-col size="2.5">
-        {{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}
-      </ion-col>
-      <ion-col size="2">{{ user.SALAIRE.SALAIRE_BRUT }}</ion-col>
-      <ion-col size="2">
-        <ion-input
-          type="number"
-          [(ngModel)]="user.SALAIRE.SALAIRE_NET"
-          [readonly]="!isEditMode"
-          [class.editable-field]="isEditMode"
-          (ionChange)="onSalaryChange(user)"
-        ></ion-input>
-      </ion-col>
-      <ion-col size="2">{{ user.SALAIRE.TOTAL_RETENU }}</ion-col>
-    </ion-row>
-  </ion-grid>
+        </ion-col>
+        <ion-col size="2">
+          <div class="employee-name">
+            <ion-icon name="person-circle-outline" color="medium"></ion-icon>
+            <span>{{ user.EMPLOYE.PRENOM }} {{ user.EMPLOYE.NOM }}</span>
+          </div>
+        </ion-col>
+        <ion-col size="1.5">
+          <span class="salary-amount">{{ user.SALAIRE.SALAIRE_BRUT | currency:'XOF':'symbol':'1.0-0' }}</span>
+        </ion-col>
+        <ion-col size="1.5">
+          <ion-input
+            type="number"
+            [(ngModel)]="user.SALAIRE.SALAIRE_NET"
+            [readonly]="!isEditMode"
+            [class.editable-field]="isEditMode"
+            (ionChange)="onSalaryChange(user)"
+            class="salary-input"
+          ></ion-input>
+        </ion-col>
+        <ion-col size="1.5">
+          <span class="salary-amount retenu">{{ user.SALAIRE.TOTAL_RETENU | currency:'XOF':'symbol':'1.0-0' }}</span>
+        </ion-col>
+        <ion-col size="3">
+          <ion-item lines="none" class="note-item">
+            <ion-textarea
+              [(ngModel)]="user.noteModePaiement"
+              placeholder="Ajouter une note..."
+              rows="1"
+              auto-grow="true"
+              class="note-textarea"
+            ></ion-textarea>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card>
+
+  <!-- Message si aucun employé -->
+  <ion-card *ngIf="!listeEmploye || listeEmploye.length === 0" class="empty-state">
+    <ion-card-content>
+      <ion-icon name="people-outline" color="medium"></ion-icon>
+      <h2>Aucun employé trouvé</h2>
+      <p>Aucun employé n'est disponible pour cette période.</p>
+    </ion-card-content>
+  </ion-card>
 </ion-content>

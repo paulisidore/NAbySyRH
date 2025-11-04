@@ -1,160 +1,425 @@
-ion-content {
-  div {
-    /*   height: 85vh;
-    padding-top: 250px; */
-    margin-bottom: 3%;
-    &#div1 {
-      ion-grid {
-        ion-row {
-          ion-col {
-            &#col1 {
-              border: 2px solid #3880ff;
-              .recherche {
-                margin-bottom: 20px;
-                text-align: center;
-                text-decoration: underline solid;
-                font-weight: bolder;
-              }
-              &.depart {
-                text-align: center;
-                font-weight: 50;
-              }
-            }
-            &#col2 {
-              border-right: 2px solid #3880ff;
-              text-align: center;
-              justify-content: space-around;
-            }
-          }
+// ==========================================
+// VARIABLES ET COULEURS
+// ==========================================
+$primary-color: #3880ff;
+$success-color: #2dd36f;
+$warning-color: #ffc409;
+$danger-color: #eb445a;
+$light-bg: #f5f6f9;
+$card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+$hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+// ==========================================
+// HEADER STYLES
+// ==========================================
+ion-header {
+  ion-toolbar {
+    --background: linear-gradient(135deg, #{$primary-color} 0%, #5a9cff 100%);
+    --color: white;
+    
+    ion-title {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.header-actions {
+  padding: 12px 16px;
+  
+  .period-selector,
+  .note-input {
+    background: white;
+    border-radius: 8px;
+    box-shadow: $card-shadow;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      box-shadow: $hover-shadow;
+    }
+    
+    ion-icon {
+      font-size: 20px;
+    }
+    
+    .period-text {
+      font-weight: 600;
+      color: $primary-color;
+      margin: 0 8px;
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .edit-btn,
+    .validate-btn {
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0.5px;
+      box-shadow: $card-shadow;
+      transition: all 0.3s ease;
+      
+      &:hover:not([disabled]) {
+        transform: translateY(-2px);
+        box-shadow: $hover-shadow;
+      }
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+    
+    .validate-btn[disabled] {
+      opacity: 0.5;
+    }
+  }
+}
+
+// ==========================================
+// MODAL ACTIONS
+// ==========================================
+.modal-actions {
+  padding: 16px;
+  
+  ion-button {
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+// ==========================================
+// STATISTIQUES ET FILTRES
+// ==========================================
+.stats-filter-section {
+  padding: 16px;
+  background-color: $light-bg;
+}
+
+.stats-card {
+  margin-bottom: 16px;
+  box-shadow: $card-shadow;
+  
+  ion-card-content {
+    padding: 16px;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $hover-shadow;
+    }
+    
+    ion-icon {
+      font-size: 36px;
+      padding: 12px;
+      background: rgba(56, 128, 255, 0.1);
+      border-radius: 12px;
+    }
+    
+    .stat-content {
+      flex: 1;
+      
+      .stat-label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+      
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a1a;
+        line-height: 1.2;
+      }
+    }
+  }
+}
+
+.filter-card {
+  box-shadow: $card-shadow;
+  
+  ion-card-content {
+    padding: 16px;
+  }
+  
+  ion-item {
+    --background: white;
+    --border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    ion-icon {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    
+    ion-input {
+      --placeholder-color: #999;
+      --placeholder-opacity: 1;
+    }
+  }
+}
+
+// ==========================================
+// TABLEAU
+// ==========================================
+.table-card {
+  margin: 16px;
+  box-shadow: $card-shadow;
+  overflow: hidden;
+}
+
+.custom-table {
+  background: white;
+  
+  .table-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+    border-bottom: 2px solid $primary-color;
+    padding: 12px 0;
+    
+    ion-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .checkbox-col {
+      ion-checkbox {
+        --size: 20px;
+        --checkbox-background-checked: #{$primary-color};
+      }
+    }
+  }
+  
+  .table-row {
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.01);
+    }
+    
+    &.row-disabled {
+      opacity: 0.6;
+      background-color: #fafafa;
+    }
+    
+    &.row-success {
+      background-color: rgba(45, 211, 111, 0.1);
+      border-left: 4px solid $success-color;
+    }
+    
+    &.row-error {
+      background-color: rgba(235, 68, 90, 0.1);
+      border-left: 4px solid $danger-color;
+    }
+    
+    ion-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      font-size: 14px;
+    }
+    
+    .checkbox-col {
+      ion-checkbox {
+        --size: 18px;
+        --checkbox-background-checked: #{$success-color};
+      }
+    }
+    
+    .employee-id {
+      font-weight: 600;
+      color: $primary-color;
+      background: rgba(56, 128, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      
+      .error-btn {
+        --padding-start: 0;
+        --padding-end: 0;
+        margin: 0;
+        width: 18px;
+        height: 18px;
+        
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+    }
+    
+    .employee-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+    
+    .salary-amount {
+      font-weight: 600;
+      color: #2c3e50;
+      
+      &.retenu {
+        color: $danger-color;
+      }
+    }
+    
+    .salary-input {
+      --background: transparent;
+      --padding-start: 8px;
+      --padding-end: 8px;
+      text-align: center;
+      font-weight: 600;
+      border-radius: 4px;
+      
+      &.editable-field {
+        --background: #fff3cd;
+        border: 2px solid $warning-color;
+        animation: pulse-border 2s infinite;
+        
+        &:focus-within {
+          --background: #fffaeb;
+          border-color: #ff9800;
+          box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+        }
+      }
+    }
+    
+    .note-item {
+      --background: transparent;
+      --padding-start: 0;
+      --padding-end: 0;
+      --inner-padding-start: 0;
+      --inner-padding-end: 0;
+      --min-height: auto;
+      
+      .note-textarea {
+        --background: #f8f9fa;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --padding-top: 6px;
+        --padding-bottom: 6px;
+        font-size: 13px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        
+        &:focus-within {
+          --background: white;
+          border-color: $primary-color;
+          box-shadow: 0 0 6px rgba(56, 128, 255, 0.2);
         }
       }
     }
   }
 }
 
-ion-datetime {
-  background: #fff;
-}
-.dismiss {
-  margin-right: 400px;
-}
-.ion-grid-user {
-  --ion--grid--padding-sm: 20px;
-  --ion--grid--padding-md: 30px;
-  --ion--grid--padding-lg: 40px;
-  --ion--grid--padding-xl: 10 0px;
-}
-.ion-row-user {
-  border: 0;
-  ion-col {
-    border: 0;
+// ==========================================
+// ERROR POPOVER
+// ==========================================
+.error-popover {
+  .error-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    
+    ion-icon {
+      font-size: 36px;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      line-height: 1.5;
+    }
   }
 }
-.custom-table {
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  overflow: hidden;
-}
 
-.table-header {
-  background-color: #f4f4f4;
-  font-weight: bold;
+// ==========================================
+// EMPTY STATE
+// ==========================================
+.empty-state {
+  margin: 32px 16px;
   text-align: center;
-  border-bottom: 2px solid #ccc;
-}
-
-.table-row {
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-}
-
-.table-row:hover {
-  background-color: #eaeaea;
-}
-
-ion-col {
-  padding: 10px;
-  text-align: center;
-}
-
-.progress-alert ion-progress-bar {
-  margin-top: 20px;
-  height: 20px;
-}
-
-.text-done {
-  background-color: #80b9f7; /* Couleur primaire */
-  font-weight: bold;
-  color: black;
-  border-radius: 5px;
-  ion-text {
-    margin: 5px;
-  }
-}
-
-.text-paiment-success {
-  background-color: #63db7f; /* Couleur de succès */
-  font-weight: bold;
-  color: black;
-  ion-text {
-    margin: 5px;
-  }
-}
-
-.text-failed {
-  background-color: #f5717f; /* Couleur de danger */
-  font-weight: bold;
-  color: black;
-  ion-text {
-    margin: 5px;
-  }
-}
-
-ion-content {
-  --overflow: scroll; /* Assurez-vous que le contenu peut défiler */
-}
-
-.sticky-button {
-  position: fixed;
-  top: 100px;
-  right: 20px; /* Positionnez-le en bas à droite */
-  z-index: 100;
-}
-
-// Styles pour le mode édition
-.editable-field {
-  background-color: #fff3cd; /* Couleur jaune claire pour indiquer l'édition */
-  border: 2px solid #ffc107; /* Bordure jaune */
-  border-radius: 4px;
-  font-weight: bold;
-  transition: all 0.3s ease;
+  box-shadow: $card-shadow;
   
-  &:focus {
-    background-color: #fffaeb;
+  ion-card-content {
+    padding: 48px 24px;
+    
+    ion-icon {
+      font-size: 72px;
+      color: #ccc;
+      margin-bottom: 16px;
+    }
+    
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      font-size: 14px;
+      color: #999;
+      margin: 0;
+    }
+  }
+}
+
+// ==========================================
+// ANIMATIONS
+// ==========================================
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: $warning-color;
+  }
+  50% {
     border-color: #ff9800;
-    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
-  }
-}
-
-ion-input[readonly] {
-  --background: transparent;
-  --color: inherit;
-  --placeholder-opacity: 0.5;
-  cursor: default;
-  border: 1px solid transparent;
-}
-
-ion-input:not([readonly]) {
-  cursor: text;
-}
-
-// Style pour le bouton de modification
-ion-button[color="warning"] {
-  --background: #ff9800;
-  --color: white;
-  
-  ion-icon {
-    animation: pulse 1.5s infinite;
   }
 }
 
@@ -165,4 +430,114 @@ ion-button[color="warning"] {
   50% {
     transform: scale(1.1);
   }
+}
+
+// ==========================================
+// PROGRESS BARS
+// ==========================================
+ion-progress-bar {
+  height: 4px;
+  
+  &[color="primary"] {
+    --progress-background: #{$primary-color};
+  }
+  
+  &[color="danger"] {
+    --progress-background: #{$danger-color};
+  }
+}
+
+// ==========================================
+// RESPONSIVE DESIGN
+// ==========================================
+@media (max-width: 768px) {
+  .header-actions {
+    .action-buttons {
+      .edit-btn,
+      .validate-btn {
+        font-size: 13px;
+        
+        ion-icon {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+  
+  .stats-card {
+    .stat-item {
+      ion-icon {
+        font-size: 28px;
+        padding: 8px;
+      }
+      
+      .stat-content {
+        .stat-label {
+          font-size: 12px;
+        }
+        
+        .stat-value {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+  
+  .custom-table {
+    .table-header {
+      font-size: 11px;
+    }
+    
+    .table-row {
+      ion-col {
+        font-size: 12px;
+        padding: 8px 4px;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-filter-section {
+    padding: 12px;
+  }
+  
+  .table-card {
+    margin: 12px;
+  }
+  
+  .custom-table {
+    .table-row {
+      .employee-name {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 11px;
+      }
+    }
+  }
+}
+
+// ==========================================
+// UTILITAIRES
+// ==========================================
+ion-content {
+  --background: #{$light-bg};
+}
+
+.text-center {
+  text-align: center;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+// Fix pour les popover Ionic
+ion-popover {
+  --width: 280px;
+  --max-width: 90vw;
 }
