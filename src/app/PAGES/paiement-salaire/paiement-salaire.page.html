@@ -45,7 +45,7 @@
                     </ion-button>
                   </ion-col>
                   <ion-col size="4">
-                    <ion-button (click)="select()" color="primary" expand="block">
+                    <ion-button (click)="selectPeriode()" color="primary" expand="block">
                       Valider
                     </ion-button>
                   </ion-col>
@@ -58,6 +58,28 @@
         <ion-col size="12" size-md="8">
           <!-- Actions principales -->
           <div class="action-buttons">
+            <ion-button
+              (click)="openExportMenu()"
+              color="tertiary"
+              expand="block"
+              class="export-btn"
+              [disabled]="!listeEmploye || listeEmploye.length === 0"
+            >
+              <ion-icon slot="start" name="cloud-download-outline"></ion-icon>
+              Exporter
+            </ion-button>
+
+            <ion-button
+              (click)="triggerFileInput()"
+              color="secondary"
+              expand="block"
+              class="import-btn"
+              [disabled]="!listeEmploye || listeEmploye.length === 0"
+            >
+              <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+              Importer
+            </ion-button>
+            
             <ion-button
               (click)="toggleEditMode()"
               [color]="isEditMode ? 'warning' : 'medium'"
@@ -91,7 +113,15 @@
   </ion-refresher>
 
   <ion-progress-bar color="primary" *ngIf="isProcessing" [value]="progress"></ion-progress-bar>
-  <ion-progress-bar color="danger" type="indeterminate" *ngIf="isLoading"></ion-progress-bar>
+  
+  <!-- Progress bar fixe au centre avec overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loading-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Chargement en cours...</p>
+      <ion-progress-bar color="primary" type="indeterminate"></ion-progress-bar>
+    </div>
+  </div>
 
   <!-- Statistiques et filtres -->
   <div class="stats-filter-section">
@@ -279,4 +309,13 @@
       <p>Aucun employé n'est disponible pour cette période.</p>
     </ion-card-content>
   </ion-card>
+
+  <!-- Input file caché pour l'import -->
+  <input
+    type="file"
+    id="importFileInput"
+    accept=".xlsx,.xls,.csv"
+    (change)="onFileSelected($event)"
+    style="display: none;"
+  />
 </ion-content>

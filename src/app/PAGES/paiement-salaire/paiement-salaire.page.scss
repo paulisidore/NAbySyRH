@@ -55,6 +55,8 @@ ion-header {
     flex-direction: column;
     gap: 8px;
     
+    .export-btn,
+    .import-btn,
     .edit-btn,
     .validate-btn {
       font-weight: 600;
@@ -73,8 +75,37 @@ ion-header {
       }
     }
     
-    .validate-btn[disabled] {
+    .export-btn {
+      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      
+      &:hover:not([disabled]) {
+        --background: linear-gradient(135deg, #5568d3 0%, #63408b 100%);
+      }
+    }
+    
+    .import-btn {
+      --background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      
+      &:hover:not([disabled]) {
+        --background: linear-gradient(135deg, #d97ce2 0%, #dc4a5d 100%);
+      }
+    }
+    
+    .validate-btn[disabled],
+    .export-btn[disabled],
+    .import-btn[disabled] {
       opacity: 0.5;
+    }
+    
+    // Responsive: affichage en grille sur tablettes et desktop
+    @media (min-width: 768px) {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }
@@ -540,4 +571,168 @@ ion-content {
 ion-popover {
   --width: 280px;
   --max-width: 90vw;
+}
+
+// ==========================================
+// LOADING OVERLAY FIXE AU CENTRE
+// ==========================================
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99997; // Juste en dessous de SweetAlert
+  backdrop-filter: blur(3px);
+  
+  .loading-container {
+    background: white;
+    border-radius: 16px;
+    padding: 30px 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    min-width: 280px;
+    max-width: 90%;
+    animation: fadeInScale 0.3s ease-out;
+    
+    ion-spinner {
+      width: 50px;
+      height: 50px;
+      --color: #{$primary-color};
+    }
+    
+    .loading-text {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      text-align: center;
+    }
+    
+    ion-progress-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      --background: rgba(56, 128, 255, 0.2);
+      --progress-background: #{$primary-color};
+    }
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ==========================================
+// FIX SWEETALERT DANS IONIC
+// ==========================================
+// Ces styles corrigent le problème d'affichage de SweetAlert dans Ionic
+// où la popup apparaît dans un petit cadre en haut de la page
+
+::ng-deep {
+  .swal-ionic-container {
+    z-index: 99999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .swal-ionic-popup {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: 90% !important;
+    width: 500px !important;
+    max-height: 90vh !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+  
+  .swal-ionic-title {
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    margin-bottom: 15px !important;
+  }
+  
+  .swal-ionic-html {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    overflow: auto !important;
+    max-height: 60vh !important;
+  }
+  
+  .swal-ionic-confirm {
+    background-color: $primary-color !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 30px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover {
+      background-color: darken($primary-color, 10%) !important;
+      transform: scale(1.05) !important;
+    }
+  }
+  
+  // Style pour le bouton Annuler (si présent)
+  .swal-ionic-cancel {
+    background-color: #6c757d !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 30px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover {
+      background-color: darken(#6c757d, 10%) !important;
+      transform: scale(1.05) !important;
+    }
+  }
+  
+  // Fix pour le backdrop (fond sombre)
+  .swal2-container {
+    z-index: 99998 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .swal2-backdrop-show {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  // Fix pour mobile
+  @media (max-width: 768px) {
+    .swal-ionic-popup {
+      width: 90% !important;
+      max-width: none !important;
+    }
+  }
 }

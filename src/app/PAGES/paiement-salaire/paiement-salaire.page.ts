@@ -1,3 +1,5 @@
+/* eslint-disable no-trailing-spaces */
+/* eslint-disable max-len */
 import { IKSSVTransactionSalaire, PaiementService } from './../../services/paiement.service';
 /* eslint-disable @typescript-eslint/adjacent-overload-signatures */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -12,6 +14,7 @@ import {
   IonDatetime,
   MenuController,
   ModalController,
+  ActionSheetController, ToastController, LoadingController
 } from '@ionic/angular';
 import { EmployeService } from 'src/app/services/employe.service';
 import { LoadingService } from 'src/app/services/loading.service';
@@ -24,6 +27,7 @@ import * as bootstrap from 'bootstrap';
 import { firstValueFrom } from 'rxjs';
 import { IApiNotification } from 'src/app/services/apireponse-structure.service';
 import { CommonKssvServiceService, xLBoutique } from 'src/app/services/common-kssv-service.service';
+import { ExportImportService } from 'src/app/services/export-import.service';
 
 @Component({
   selector: 'app-paiement-salaire',
@@ -82,13 +86,17 @@ export class PaiementSalairePage implements OnInit {
     private paiementSrv: PaiementService,
     private kssvSrv: CommonKssvServiceService,
     private cdr: ChangeDetectorRef,
+    private exportImportService: ExportImportService,
+    private actionSheetController: ActionSheetController,
+    private toastController: ToastController,
+    private loadingController: LoadingController,
   ) {}
 
   ngOnInit() {
     this.setToday();
     this.today = new Date().getDate();
     this.loadBoutiqueKSSV();
-    this.loadEmploye();
+    //this.loadEmploye(); //Commenté pour eviter le chargement initial de tous les employés de toutes les boutiques
     //console.log(this.selectedMonth);
     //console.log(this.selectedYear);
   }
@@ -103,16 +111,39 @@ export class PaiementSalairePage implements OnInit {
   }
 
   // Nouvelle méthode pour activer/désactiver le mode édition
+  // ============================================
+  // MÉTHODE toggleEditMode() - VERSION OPTIMISÉE
+  // ============================================
+
+  /**
+   * Active/désactive le mode édition avec notification SweetAlert
+   * VERSION OPTIMISÉE - Sans duplication de code
+   */
   toggleEditMode() {
     this.isEditMode = !this.isEditMode;
+    
+    // Configuration commune pour SweetAlert
+    const swalConfig = {
+      timer: 2000,
+      showConfirmButton: false,
+      customClass: {
+        container: 'swal-ionic-container',
+        popup: 'swal-ionic-popup',
+        title: 'swal-ionic-title',
+        htmlContainer: 'swal-ionic-html'
+      },
+      heightAuto: false,
+      backdrop: true,
+      allowOutsideClick: true
+    };
+    
     if (this.isEditMode) {
       // Mode édition activé
       Swal.fire({
         icon: 'info',
         title: 'Mode édition activé',
         text: 'Vous pouvez maintenant modifier les montants des salaires nets',
-        timer: 2000,
-        showConfirmButton: false
+        ...swalConfig
       });
     } else {
       // Mode édition désactivé
@@ -120,8 +151,7 @@ export class PaiementSalairePage implements OnInit {
         icon: 'success',
         title: 'Mode édition désactivé',
         text: 'Les modifications ont été verrouillées',
-        timer: 2000,
-        showConfirmButton: false
+        ...swalConfig
       });
     }
   }
@@ -131,6 +161,8 @@ export class PaiementSalairePage implements OnInit {
     if (!this.isEditMode) {
       return;
     }
+
+    user.salaireIsEdited = true;
 
     // Valider que le montant est positif
     if (user.SALAIRE.SALAIRE_NET < 0) {
@@ -189,6 +221,7 @@ export class PaiementSalairePage implements OnInit {
   close() {
     this.datetime.cancel(true);
   }
+
   select() {
     this.datetime.confirm(true);
     // this.loadPaiement();
@@ -199,6 +232,16 @@ export class PaiementSalairePage implements OnInit {
     console.log(this.selectedYear);
     this.loadEmploye();
   }
+
+  selectPeriode() {
+    this.datetime.confirm(true);
+    console.log(this.selectedDate);
+    this.selectedMonth = format(parseISO(this.selectedDate), 'MM');
+    console.log(this.selectedMonth);
+    this.selectedYear = format(parseISO(this.selectedDate), 'yyyy');
+    console.log(this.selectedYear);
+  }
+
   effacedateDebut() {
     this.datetime.cancel(true);
     this.selectedDate = '';
@@ -269,6 +312,10 @@ export class PaiementSalairePage implements OnInit {
       }
       let IdEmploye = `&IDEMPLOYE=${employee.IDEMPLOYE}`;
       const noteModePaiement = employee.noteModePaiement || ''; // Utiliser la note de l'employé
+      let txMontantSalaireEdited='';
+      if(employee.salaireIsEdited){
+        txMontantSalaireEdited = '&MONTANT='+employee.SALAIRE.SALAIRE_NET;
+      }
       const apiUrl =
         environment.endPoint +
         'salaire_action.php?Action=PAIEMENT_SALAIRE&MOIS=' +
@@ -277,6 +324,7 @@ export class PaiementSalairePage implements OnInit {
         this.selectedYear +
         IdEmploye +
         '&NOTE_MODEPAIEMENT=' +
+        txMontantSalaireEdited +
         encodeURIComponent(noteModePaiement) +
         txBout +
         '&Token=' +
@@ -327,6 +375,7 @@ export class PaiementSalairePage implements OnInit {
               }
             }
           }
+          console.log('Erreur de paiement: ', employee);
         }else{
           employee.status = 'échec'; // Paiement échoué
           employee.TxErreur = repo.TxErreur; // Stocker l'erreur pour affichage
@@ -402,6 +451,7 @@ export class PaiementSalairePage implements OnInit {
         status: emp.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
         TxErreur: '', // Initialiser le champ d'erreur
         noteModePaiement: '', // Initialiser la note de paiement individuelle
+        salaireIsEdited: false, // Indicateur de modification du salaire
       }));
 
       this.users = [...this.listeEmploye];
@@ -466,10 +516,9 @@ export class PaiementSalairePage implements OnInit {
     //console.log('Nb Emp. Selectionné: '+this.selectedEmployees.length);
     // Mettre à jour l'état de la checkbox principale après un délai
 
-      setTimeout(() => {
-          this.updateSelectAllState();
-        }, 0);
-
+    setTimeout(() => {
+        this.updateSelectAllState();
+      }, 0);
 
   }
 
@@ -512,7 +561,295 @@ export class PaiementSalairePage implements OnInit {
   allCheckboxDisabled(): boolean {
     return this.listeEmploye.every((user) => user.SALAIRE.SALAIRE_NET <= 0);
   }
+
   getTotalNetSalary(): number {
     return this.selectedEmployees.reduce((total, employee) => total + (employee.SALAIRE?.SALAIRE_NET || 0), 0);
+  }
+
+  /**
+   * Ouvre le menu d'export
+   */
+  async openExportMenu() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Exporter les données',
+      buttons: [
+        {
+          text: 'Excel (.xlsx)',
+          icon: 'document-text-outline',
+          handler: () => {
+            this.exportData('excel');
+          }
+        }/* ,
+        {
+          text: 'CSV (.csv)',
+          icon: 'document-outline',
+          handler: () => {
+            this.exportData('csv');
+          }
+        } */,
+        {
+          text: 'PDF (.pdf)',
+          icon: 'document-attach-outline',
+          handler: () => {
+            this.exportData('pdf');
+          }
+        },
+        {
+          text: 'Annuler',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  /**
+   * Exporte les données dans le format spécifié
+   */
+  async exportData(format: 'excel' | 'csv' | 'pdf') {
+    try {
+      // Vérifier qu'il y a des données à exporter
+      if (!this.listeEmploye || this.listeEmploye.length === 0) {
+        await this.toastController.create({
+          message: 'Aucune donnée à exporter',
+          duration: 2000,
+          color: 'warning'
+        }).then(toast => toast.present());
+        return;
+      }
+
+      // Préparer les données pour l'export
+      const dataToExport = this.exportImportService.prepareExportData(this.listeEmploye);
+      
+      // Construire le nom du fichier avec la période
+      let fileName = 'salaires';
+      
+      // Ajouter le nom de la boutique si une boutique spécifique est sélectionnée
+      if (this.idBoutiqueAPayer && this.idBoutiqueAPayer !== 0 && this.idBoutiqueAPayer !== 0) {
+        const boutiqueSelectionnee = this.listeBoutiqueKSSV?.find(
+          b => b.ID === this.idBoutiqueAPayer
+        );
+        if (boutiqueSelectionnee) {
+          // Nettoyer le nom de la boutique (enlever caractères spéciaux)
+          const nomBoutique = boutiqueSelectionnee.NOM
+            .replace(/[^a-zA-Z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .toLowerCase();
+          fileName += `_${nomBoutique}`;
+        }
+      } else {
+        fileName += '_toutes_boutiques';
+      }
+      
+      // Ajouter la période
+      if (this.formattedString) {
+        const periode = new Date(this.formattedString)
+          .toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
+          .replace(' ', '_');
+        fileName += `_${periode}`;
+      }
+      
+      const periode = this.formattedString ? 
+        new Date(this.formattedString).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }) : 
+        '';
+
+      // Effectuer l'export selon le format
+      switch (format) {
+        case 'excel':
+          this.exportImportService.exportToExcel(dataToExport, fileName);
+          break;
+        case 'csv':
+          this.exportImportService.exportToCSV(dataToExport, fileName);
+          break;
+        case 'pdf':
+          this.exportImportService.exportToPDF(dataToExport, fileName, periode);
+          break;
+      }
+
+      // Message de succès
+      await this.toastController.create({
+        message: `Export ${format.toUpperCase()} réussi !`,
+        duration: 2000,
+        color: 'success',
+        icon: 'checkmark-circle'
+      }).then(toast => toast.present());
+
+    } catch (error) {
+      console.error('Erreur lors de l\'export:', error);
+      await this.toastController.create({
+        message: 'Erreur lors de l\'export des données',
+        duration: 3000,
+        color: 'danger'
+      }).then(toast => toast.present());
+    }
+  }
+
+  /**
+   * Déclenche la sélection de fichier pour l'import
+   */
+  triggerFileInput() {
+    const fileInput = document.getElementById('importFileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  /**
+   * Gère l'import de fichier
+   * VERSION CORRIGÉE avec SweetAlert configuré pour Ionic
+   */
+  async onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    
+    if (!file) {
+      return;
+    }
+
+    // Vérifier l'extension du fichier
+    const validExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+    if (!validExtensions.includes(fileExtension)) {
+      await this.toastController.create({
+        message: 'Format de fichier non supporté. Utilisez Excel (.xlsx, .xls) ou CSV (.csv)',
+        duration: 3000,
+        color: 'danger'
+      }).then(toast => toast.present());
+      return;
+    }
+
+    // Afficher un loader
+    const loading = await this.loadingController.create({
+      message: 'Import en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      // Importer les données
+      const importedData = await this.exportImportService.importFromFile(file);
+      
+      // Appliquer les modifications
+      const result = this.applyImportedData(importedData);
+      
+      await loading.dismiss();
+      
+      // Afficher le résultat avec SweetAlert - VERSION CORRIGÉE
+      await Swal.fire({
+        title: 'Import terminé',
+        html: `
+          <div style="text-align: left; padding: 10px;">
+            <p style="margin: 8px 0;"><strong>✓ ${result.updated} employé(s) mis à jour</strong></p>
+            ${result.notFound > 0 ? `<p style="margin: 8px 0; color: orange;">⚠ ${result.notFound} ID(s) non trouvé(s)</p>` : ''}
+            ${result.errors.length > 0 ? `<p style="margin: 8px 0; color: red;">✗ ${result.errors.length} erreur(s)</p>` : ''}
+          </div>
+        `,
+        icon: result.errors.length > 0 ? 'warning' : 'success',
+        confirmButtonText: 'OK',
+        customClass: {
+          container: 'swal-ionic-container',
+          popup: 'swal-ionic-popup',
+          title: 'swal-ionic-title',
+          htmlContainer: 'swal-ionic-html',
+          confirmButton: 'swal-ionic-confirm'
+        },
+        heightAuto: false,  // IMPORTANT pour Ionic
+        backdrop: true,
+        allowOutsideClick: true
+      });
+
+      // Rafraîchir l'affichage
+      this.cdr.detectChanges();
+
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Erreur lors de l\'import:', error);
+      
+      await Swal.fire({
+        title: 'Erreur d\'import',
+        text: error.message || 'Une erreur est survenue lors de l\'import',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        customClass: {
+          container: 'swal-ionic-container',
+          popup: 'swal-ionic-popup',
+          title: 'swal-ionic-title',
+          confirmButton: 'swal-ionic-confirm'
+        },
+        heightAuto: false,  // IMPORTANT pour Ionic
+        backdrop: true,
+        allowOutsideClick: true
+      });
+    }
+
+    // Réinitialiser l'input file
+    event.target.value = '';
+  }
+
+  /**
+   * Applique les données importées à la liste des employés
+   */
+  private applyImportedData(importedData: any[]): { updated: number; notFound: number; errors: string[] } {
+    let updated = 0;
+    let notFound = 0;
+    const errors: string[] = [];
+
+    importedData.forEach(importRow => {
+      // Trouver l'employé correspondant dans la liste
+      const employee = this.listeEmploye.find(emp => emp.IDEMPLOYE === importRow.IDEMPLOYE);
+      
+      if (employee) {
+        // Mettre à jour le salaire net si fourni
+        if (importRow.SALAIRE_NET !== null && importRow.SALAIRE_NET !== undefined) {
+          const oldValue = employee.SALAIRE.SALAIRE_NET;
+          employee.SALAIRE.SALAIRE_NET = importRow.SALAIRE_NET;
+          
+          // Recalculer le total retenu
+          employee.SALAIRE.TOTAL_RETENU = employee.SALAIRE.SALAIRE_BRUT - employee.SALAIRE.SALAIRE_NET;
+          
+          // Désélectionner si le salaire net devient <= 0
+          if (employee.SALAIRE.SALAIRE_NET <= 0) {
+            employee.selected = false;
+          }
+        }
+        
+        // Mettre à jour la note si fournie
+        if (importRow.NOTE !== null && importRow.NOTE !== undefined) {
+          employee.noteModePaiement = importRow.NOTE;
+        }
+        
+        updated++;
+      } else {
+        notFound++;
+        errors.push(`ID ${importRow.IDEMPLOYE} non trouvé dans la liste`);
+      }
+    });
+
+    // Mettre à jour la sélection globale
+    this.updateGlobalSelection();
+
+    return { updated, notFound, errors };
+  }
+
+  /**
+   * Met à jour l'état de la sélection globale après modifications
+   */
+  private updateGlobalSelection() {
+    // Compter les employés sélectionnables (salaire net > 0)
+    const selectableEmployees = this.listeEmploye.filter(emp => emp.SALAIRE.SALAIRE_NET > 0);
+    
+    // Compter les employés sélectionnés
+    const selectedCount = this.listeEmploye.filter(emp => emp.selected).length;
+    
+    // Mettre à jour selectedEmployees
+    this.selectedEmployees = this.listeEmploye.filter(emp => emp.selected);
+    
+    // Mettre à jour le state du checkbox "Tout sélectionner"
+    if (selectableEmployees.length > 0) {
+      this.selectAllCheckBox = selectedCount === selectableEmployees.length;
+    } else {
+      this.selectAllCheckBox = false;
+    }
   }
 }
