@@ -1,3 +1,5 @@
+/* eslint-disable object-shorthand */
+/* eslint-disable jsdoc/newline-after-description */
 /* eslint-disable @typescript-eslint/dot-notation */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -22,6 +24,7 @@ import {
   ModalController,
   Platform,
   ToastController,
+  LoadingController,
 } from '@ionic/angular';
 import { IonicSelectableComponent } from 'ionic-selectable';
 import { environment } from 'src/environments/environment';
@@ -30,6 +33,8 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { format, parseISO } from 'date-fns';
 import { PopupModalService } from 'src/app/services/popup-modal.service';
+import { PaiementService } from '../services/paiement.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-list-salaires',
@@ -118,8 +123,9 @@ export class ListSalairesPage implements OnInit {
 
   // Segments
   segmentList: Array<string> = [
-    'PAIEMENT OU AVANCE SALAIRE',
+    'SALAIRE OU AVANCE SALAIRE',
     'HISTORIQUE DES SALAIRES',
+    'DEMANDE D\'AVANCE SALAIRE',
   ];
   selectedSegment: string;
   slideList: Array<string> = ['Slide Segment 1', 'Slide Segment 2'];
@@ -131,7 +137,11 @@ export class ListSalairesPage implements OnInit {
     private menu: MenuController,
     private http: HttpClient,
     private popupModalService: PopupModalService,
-    private toastctrl: ToastController
+    private toastctrl: ToastController,
+    private paiementService: PaiementService,
+    private toastController: ToastController,
+    private loadingController: LoadingController,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -184,11 +194,18 @@ export class ListSalairesPage implements OnInit {
         localStorage.getItem('nabysy_token')
     ).subscribe((listes) => {
       console.log(listes);
-      this.listeEmploye = listes;
-      this.users = listes;
+      const vlist = listes.map(user => ({
+        ...user,
+        searchString: `${user.Prenom} ${user.Nom} ${user.Fonction} ${user.Tel}` // Champ combiné
+      }));
+      this.listeEmploye = vlist;
+      this.users = vlist;
       console.log(this.listeEmploye);
+
     });
   }
+
+
   loadSalary() {
     let txEmploye = '';
     if (this.id > 0) {
@@ -225,10 +242,10 @@ export class ListSalairesPage implements OnInit {
         this.partIrpp = this.listeSalaire.BULLETIN_SALAIRE.PART_IRPP;
         this.periodePaie = this.listeSalaire.BULLETIN_SALAIRE.PERIODE_DE_PAIE;
         this.dateEmbauche = this.listeSalaire.BULLETIN_SALAIRE.DATE_EMBAUCHE;
-        this.gainPrime = this.listeSalaire.BULLETIN_SALAIRE.LIGNE_GAIN_PRIME;
+        this.gainPrime = this.listeSalaire.BULLETIN_SALAIRE.LIGNE_GAIN_PRIME.sort((a, b) => a.Ordre - b.Ordre);
         this.SALAIRE_BRUT = this.listeSalaire.BULLETIN_SALAIRE.SALAIRE_BRUT;
         this.ligneCotisation =
-          this.listeSalaire.BULLETIN_SALAIRE.LIGNE_COTISATION;
+          this.listeSalaire.BULLETIN_SALAIRE.LIGNE_COTISATION.sort((a, b) => a.Ordre - b.Ordre);
         this.entreprise = this.listeSalaire.BULLETIN_SALAIRE.NOM_ENTREPRISE;
         this.adressEntr = this.listeSalaire.BULLETIN_SALAIRE.ADR_ENTREPRISE;
         this.contactEntre =
@@ -237,7 +254,7 @@ export class ListSalairesPage implements OnInit {
         this.phoneEntre = this.listeSalaire.BULLETIN_SALAIRE.TEL_ENTREPRISE;
         this.prenom = this.listeSalaire.BULLETIN_SALAIRE.PRENOMEMPLOYE;
       }
-      console.log(this.listeSalaire.BULLETIN_SALAIRE.LIGNE_GAIN_PRIME);
+      console.log(this.gainPrime);
     });
   }
 
@@ -284,7 +301,7 @@ export class ListSalairesPage implements OnInit {
 
   readAPI(url: string) {
     console.log(url);
-    return this.http.get(url);
+    return this.http.get<any>(url);
   }
   _openSideNav() {
     this.menu.enable(true, 'menu-content');
@@ -379,7 +396,7 @@ export class ListSalairesPage implements OnInit {
 
   getItems(): void {
     this.items = this.gainPrime;
-    console.log(this.items);
+    console.log('gainPrime: ',this.items);
   }
 
   buildTableBody(data: any, columns: any): any {
@@ -458,7 +475,7 @@ export class ListSalairesPage implements OnInit {
   // *****************cotisation**********************
   getItems2(): void {
     this.items2 = this.ligneCotisation;
-    console.log(this.items2);
+    console.log('Cotisation: ',this.items2);
   }
 
   buildTableBody2(data: any, columns: any): any {
@@ -529,7 +546,7 @@ export class ListSalairesPage implements OnInit {
     this.getItems();
 
     this.getItems2();
-    console.log(this.items2);
+    //console.log(this.items2);
 
     const docDefinition = {
       content: [
@@ -1264,4 +1281,269 @@ export class ListSalairesPage implements OnInit {
     }
     this.loadHistorySalary();
   }
+
+  /**
+   * Modifie un historique de paiement
+   * @param item L'historique à modifier
+   */
+  async editHistorique(item: any) {
+    // Afficher un popup avec input pour modifier le montant
+    const alert = await this.alertController.create({
+      header: 'Modifier le paiement',
+      message: `
+        <div style="text-align: left;">
+          <p><strong>Employé:</strong> ${item.Prenom} ${item.Nom}</p>
+          <p><strong>Date:</strong> ${item.DatePaie}</p>
+          <p><strong>Montant actuel:</strong> ${item.TotalVers} XOF</p>
+        </div>
+      `,
+      inputs: [
+        {
+          name: 'montant',
+          type: 'number',
+          placeholder: 'Nouveau montant',
+          value: item.TotalVers,
+          min: 0,
+          attributes: {
+            inputmode: 'numeric'
+          }
+        }
+      ],
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Modifier',
+          handler: (data) => {
+            if (!data.montant || data.montant <= 0) {
+              this.showToast('Le montant doit être supérieur à 0', 'danger');
+              return false;
+            }
+            this.confirmEditHistorique(item, parseFloat(data.montant));
+            return true;
+          }
+        }
+      ],
+      cssClass: 'custom-alert'
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Confirme et exécute la modification
+   */
+  private async confirmEditHistorique(item: any, newMontant: number) {
+    // Confirmation avec SweetAlert
+    const result = await Swal.fire({
+      title: 'Confirmer la modification ?',
+      html: `
+        <div style="text-align: left; padding: 10px;">
+          <p><strong>Employé:</strong> ${item.Prenom} ${item.Nom}</p>
+          <p><strong>Ancien montant:</strong> ${item.TotalVers.toLocaleString('fr-FR')} XOF</p>
+          <p><strong>Nouveau montant:</strong> ${newMontant.toLocaleString('fr-FR')} XOF</p>
+          <p style="color: ${newMontant > item.TotalVers ? 'green' : 'red'};">
+            <strong>Différence:</strong> ${Math.abs(newMontant - item.TotalVers).toLocaleString('fr-FR')} XOF
+          </p>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, modifier',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+      customClass: {
+        container: 'swal-ionic-container',
+        popup: 'swal-ionic-popup',
+        title: 'swal-ionic-title',
+        htmlContainer: 'swal-ionic-html',
+        confirmButton: 'swal-ionic-confirm',
+        cancelButton: 'swal-ionic-cancel'
+      },
+      heightAuto: false,
+      backdrop: true,
+      allowOutsideClick: false
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    // Afficher un loader
+    const loading = await this.loadingController.create({
+      message: 'Modification en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      // Appel au service
+      const response = await this.paiementService.editHistoriqueSalaire(item.ID, newMontant);
+
+      await loading.dismiss();
+
+      if (response.OK > 0) {
+        // Succès
+        await Swal.fire({
+          title: 'Modification réussie !',
+          text: 'Le paiement a été modifié avec succès',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 2000,
+          customClass: {
+            container: 'swal-ionic-container',
+            popup: 'swal-ionic-popup',
+            title: 'swal-ionic-title',
+            confirmButton: 'swal-ionic-confirm'
+          },
+          heightAuto: false,
+          backdrop: true
+        });
+
+        // Recharger l'historique
+        this.loadHistorySalary();
+      } else {
+        // Erreur de l'API
+        throw new Error(response.TxErreur || 'Erreur lors de la modification');
+      }
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Erreur lors de la modification:', error);
+
+      await Swal.fire({
+        title: 'Erreur',
+        text: error.message || 'Une erreur est survenue lors de la modification',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        customClass: {
+          container: 'swal-ionic-container',
+          popup: 'swal-ionic-popup',
+          title: 'swal-ionic-title',
+          confirmButton: 'swal-ionic-confirm'
+        },
+        heightAuto: false,
+        backdrop: true
+      });
+    }
+  }
+
+  /**
+   * Supprime un historique de paiement
+   * @param item L'historique à supprimer
+   */
+  async deleteHistorique(item: any) {
+    // Confirmation avec SweetAlert
+    const result = await Swal.fire({
+      title: 'Supprimer ce paiement ?',
+      html: `
+        <div style="text-align: left; padding: 10px;">
+          <p><strong>Employé:</strong> ${item.Prenom} ${item.Nom}</p>
+          <p><strong>Date:</strong> ${item.DatePaie}</p>
+          <p><strong>Montant:</strong> ${item.TotalVers.toLocaleString('fr-FR')} XOF</p>
+          <hr>
+          <p style="color: red; font-weight: bold;">
+            ⚠️ Cette action est irréversible !
+          </p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      customClass: {
+        container: 'swal-ionic-container',
+        popup: 'swal-ionic-popup',
+        title: 'swal-ionic-title',
+        htmlContainer: 'swal-ionic-html',
+        confirmButton: 'swal-ionic-confirm',
+        cancelButton: 'swal-ionic-cancel'
+      },
+      heightAuto: false,
+      backdrop: true,
+      allowOutsideClick: false
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    // Afficher un loader
+    const loading = await this.loadingController.create({
+      message: 'Suppression en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      // Appel au service
+      const response = await this.paiementService.deleteHistoriqueSalaire(item.ID);
+
+      await loading.dismiss();
+
+      if (response.OK > 0) {
+        // Succès
+        await Swal.fire({
+          title: 'Suppression réussie !',
+          text: 'Le paiement a été supprimé avec succès',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 2000,
+          customClass: {
+            container: 'swal-ionic-container',
+            popup: 'swal-ionic-popup',
+            title: 'swal-ionic-title',
+            confirmButton: 'swal-ionic-confirm'
+          },
+          heightAuto: false,
+          backdrop: true
+        });
+
+        // Recharger l'historique
+        this.loadHistorySalary();
+      } else {
+        // Erreur de l'API
+        throw new Error(response.TxErreur || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      await loading.dismiss();
+      console.error('Erreur lors de la suppression:', error);
+
+      await Swal.fire({
+        title: 'Erreur',
+        text: error.message || 'Une erreur est survenue lors de la suppression',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        customClass: {
+          container: 'swal-ionic-container',
+          popup: 'swal-ionic-popup',
+          title: 'swal-ionic-title',
+          confirmButton: 'swal-ionic-confirm'
+        },
+        heightAuto: false,
+        backdrop: true
+      });
+    }
+  }
+
+  /**
+   * Affiche un toast message
+   * @param message Le message à afficher
+   * @param color La couleur du toast
+   */
+  private async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      color: color,
+      position: 'top'
+    });
+    await toast.present();
+  }
+
 }

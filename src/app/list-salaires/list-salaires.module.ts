@@ -10,6 +10,8 @@ import { ListSalairesPage } from './list-salaires.page';
 import { IonicSelectableModule } from 'ionic-selectable';
 import { Ng2SearchPipeModule } from 'ng2-search-filter';
 import { Ng2OrderModule } from 'ng2-order-pipe';
+import { HistoriqueAvanceComponent } from '../PAGES/salaires/historique-avance/historique-avance.component';
+import { DemandeAvanceModalComponent } from '../PAGES/salaires/demande-avance-modal/demande-avance-modal.component';
 
 @NgModule({
   imports: [
@@ -20,8 +22,8 @@ import { Ng2OrderModule } from 'ng2-order-pipe';
      IonicSelectableModule,
         Ng2SearchPipeModule,
         Ng2OrderModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
   ],
-  declarations: [ListSalairesPage]
+  declarations: [ListSalairesPage, HistoriqueAvanceComponent, DemandeAvanceModalComponent]
 })
 export class ListSalairesPageModule {}

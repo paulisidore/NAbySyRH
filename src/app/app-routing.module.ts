@@ -249,9 +249,14 @@ const routes: Routes = [
       import('./CRUD/employee-modal/employee-modal.module').then(
         (m) => m.EmployeeModalPageModule
       ),
-  },  {
+  },
+  {
     path: 'list-salaires',
     loadChildren: () => import('./list-salaires/list-salaires.module').then( m => m.ListSalairesPageModule)
+  },
+  {
+    path: 'paiement-vrac',
+    loadChildren: () => import('./PAGES/paiementen-vrac/paiementen-vrac.module').then( m => m.PaiementenVracPageModule)
   },
 
 ];

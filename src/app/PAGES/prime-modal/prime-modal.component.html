@@ -1,0 +1,201 @@
+<ion-header>
+  <ion-toolbar color="success">
+    <ion-title>Ajouter une Prime</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="prime-modal-content">
+  <div class="modal-container">
+    <!-- Section Formulaire -->
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-title>Informations de la Prime</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <form>
+          <!-- Nombre de Points -->
+          <ion-item lines="full" [class.item-has-error]="nbPointError">
+            <ion-label position="stacked">
+              Nombre de Points <span class="required">*</span>
+            </ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="nbPoint"
+              name="nbPoint"
+              placeholder="Ex: 10"
+              min="0"
+              step="1"
+              (ionChange)="nbPointError = ''"
+            ></ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="nbPointError">
+            <ion-icon name="alert-circle"></ion-icon>
+            {{ nbPointError }}
+          </div>
+
+          <!-- Motif -->
+          <ion-item lines="full" [class.item-has-error]="motifError">
+            <ion-label position="stacked">
+              Motif <span class="required">*</span>
+            </ion-label>
+            <ion-input
+              [(ngModel)]="motif"
+              name="motif"
+              placeholder="Ex: Performance exceptionnelle, Objectif atteint..."
+              maxlength="200"
+              (ionChange)="motifError = ''"
+            ></ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="motifError">
+            <ion-icon name="alert-circle"></ion-icon>
+            {{ motifError }}
+          </div>
+
+          <!-- Commentaire -->
+          <ion-item lines="full">
+            <ion-label position="stacked">
+              Commentaire <span class="optional">(optionnel)</span>
+            </ion-label>
+            <ion-textarea
+              [(ngModel)]="commentaire"
+              name="commentaire"
+              placeholder="Ajouter des détails supplémentaires..."
+              rows="2"
+              maxlength="500"
+            ></ion-textarea>
+          </ion-item>
+          <div class="char-counter">
+            {{ commentaire?.length || 0 }} / 500 caractères
+          </div>
+
+          <!-- Montant de la Prime -->
+          <ion-item lines="full" [class.item-has-error]="montantPrimeError">
+            <ion-label position="stacked">
+              Montant de la Prime (XOF) <span class="optional">(optionnel)</span>
+            </ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="montantPrime"
+              name="montantPrime"
+              placeholder="Ex: 25000"
+              min="0"
+              step="1000"
+              (ionChange)="montantPrimeError = ''"
+            ></ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="montantPrimeError">
+            <ion-icon name="alert-circle"></ion-icon>
+            {{ montantPrimeError }}
+          </div>
+          <div class="info-message">
+            <ion-icon name="information-circle"></ion-icon>
+            Si aucun montant n'est spécifié, le calcul sera fait selon les points
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Section Sélection des Employés -->
+    <ion-card class="employees-card">
+      <ion-card-header>
+        <ion-card-title>
+          Sélection des Employés
+          <ion-badge color="success" class="employee-count">
+            {{ employesSelectionnes.length }} / {{ listeEmployes.length }}
+          </ion-badge>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Barre de recherche -->
+        <ion-searchbar
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un employé..."
+          animated
+          debounce="300"
+        ></ion-searchbar>
+
+        <!-- Checkbox Tout sélectionner -->
+        <ion-item lines="full" class="select-all-item">
+          <ion-checkbox
+            slot="start"
+            [checked]="selectAll"
+            (ionChange)="onSelectAllChange($event)"
+          ></ion-checkbox>
+          <ion-label>
+            <strong>Tout sélectionner / Tout désélectionner</strong>
+          </ion-label>
+        </ion-item>
+
+        <!-- Liste des employés -->
+        <div class="employees-list">
+          <ion-item
+            *ngFor="let employe of employesFiltres"
+            lines="full"
+            class="employee-item"
+          >
+            <ion-checkbox
+              slot="start"
+              [checked]="isEmployeSelected(employe)"
+              (ionChange)="onEmployeSelect(employe, $event)"
+            ></ion-checkbox>
+            
+            <ion-label>
+              <div class="employee-info">
+                <div class="employee-name">
+                  <ion-icon name="person-circle-outline" color="medium"></ion-icon>
+                  <span>{{ employe.EMPLOYE?.PRENOM }} {{ employe.EMPLOYE?.NOM }}</span>
+                </div>
+                <div class="employee-details">
+                  <ion-badge color="light">ID: {{ employe.IDEMPLOYE }}</ion-badge>
+                  <ion-badge color="success">
+                    {{ employe.SALAIRE?.SALAIRE_NET | currency:'XOF':'symbol':'1.0-0' }}
+                  </ion-badge>
+                </div>
+              </div>
+            </ion-label>
+          </ion-item>
+
+          <!-- Message si aucun résultat -->
+          <div class="no-results" *ngIf="employesFiltres.length === 0">
+            <ion-icon name="search-outline" color="medium"></ion-icon>
+            <p>Aucun employé trouvé</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="footer-buttons">
+      <ion-button
+        expand="block"
+        color="medium"
+        (click)="dismiss()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon slot="start" name="close-circle"></ion-icon>
+        Annuler
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        color="success"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+      >
+        <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!isSubmitting" slot="start" name="gift"></ion-icon>
+        {{ isSubmitting ? 'Traitement...' : 'Ajouter la Prime' }}
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

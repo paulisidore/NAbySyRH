@@ -70,7 +70,7 @@
     </ion-item>
     <ion-item>
       <ion-label position="floating">Nombre de point</ion-label>
-      <ion-input [(ngModel)]='this.point'  ></ion-input>
+      <ion-input type="number" [(ngModel)]='this.point'  ></ion-input>
     </ion-item>
     <ion-item>
       <ion-label position="floating">Motif</ion-label>
@@ -81,8 +81,8 @@
       <ion-input [(ngModel)]='this.commentaire'></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label position="floating">Origine Table</ion-label>
-      <ion-input [(ngModel)]='this.origineTable'></ion-input>
+      <ion-label position="floating">Montant de la Prime</ion-label>
+      <ion-input type="number" [(ngModel)]='this.montantPrime'></ion-input>
     </ion-item>
   </ion-list>
   <ion-button fill="outline"expand="block"color="primary"type="submit"(click)="onSubmit()">

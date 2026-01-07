@@ -1,3 +1,5 @@
+import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
 /* eslint-disable @typescript-eslint/naming-convention */
 import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -21,15 +23,13 @@ import * as fr from '@angular/common/locales/fr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InertDirective } from './services/inert.directive';
 import { PaiementSalairePage } from './PAGES/paiement-salaire/paiement-salaire.page';
-
-
-
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
-  declarations: [AppComponent,  InertDirective,],
+  declarations: [AppComponent,  InertDirective, ],
   imports: [BrowserModule,IonicModule.forRoot(),
-    HttpClientModule, AppRoutingModule, IonicSelectableModule,FormsModule,ReactiveFormsModule],
+    HttpClientModule, AppRoutingModule, IonicSelectableModule,FormsModule,ReactiveFormsModule,
+  MatIconModule, MatTableModule, BrowserAnimationsModule ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR'},
     ToastController,

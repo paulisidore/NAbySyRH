@@ -11,15 +11,15 @@ export const environment = {
   passWord: '',
   appInfo: null,
   userProfile: null,
-  endPoint:'https://kssv.homeip.net/nabysyrhrs/',
+  //endPoint:'https://kssv.homeip.net/nabysyrhrs/',
   //endPoint: 'https://cloud-549579568.onetsolutions.network/nabysyrhrs/',
-  //endPoint:'https://technoweb.homeip.net/nabysyrhrs/',
+  endPoint:'https://technoweb.homeip.net/nabysyrhrs/',
   //endPoint: 'https://groupe-pam.net/nabysyrhrs/',
   employeConnecte: null,
   tokenUser:'',
-  nabysyGS: {"messagingEndpoint":"https://kssv.homeip.net/app/web/nabysy/relationclient_action.php",
-              "mainEndpoint":"https://kssv.homeip.net/app/web/nabysy/",
-              "fidelityEndpoint":"https://kssv.homeip.net/gs_api.php" },
+  nabysyGS: {"messagingEndpoint":"https://technoweb.homeip.net/app/web/nabysy/relationclient_action.php",
+              "mainEndpoint":"https://technoweb.homeip.net/app/web/nabysy/",
+              "fidelityEndpoint":"https://technoweb.homeip.net/gs_api.php" },
 
   };
 
