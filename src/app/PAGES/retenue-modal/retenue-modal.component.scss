@@ -1,0 +1,299 @@
+// Variables
+$primary-color: #3880ff;
+$success-color: #2dd36f;
+$warning-color: #ffc409;
+$danger-color: #eb445a;
+$light-bg: #f5f6f9;
+$card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+// Container principal
+.retenue-modal-content {
+  --background: #{$light-bg};
+}
+
+.modal-container {
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// Cards
+.form-card,
+.employees-card {
+  margin-bottom: 16px;
+  box-shadow: $card-shadow;
+  border-radius: 12px;
+  
+  ion-card-header {
+    padding: 16px;
+    background: linear-gradient(135deg, #{$primary-color} 0%, #5a9cff 100%);
+    
+    ion-card-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      .employee-count {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+    }
+  }
+  
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+// Formulaire
+ion-item {
+  --background: white;
+  --border-radius: 8px;
+  margin-bottom: 8px;
+  
+  &.item-has-error {
+    --border-color: #{$danger-color};
+    --highlight-color-focused: #{$danger-color};
+  }
+  
+  ion-label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    
+    .required {
+      color: $danger-color;
+      font-weight: 700;
+    }
+  }
+  
+  ion-input,
+  ion-textarea {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    font-size: 16px;
+  }
+  
+  ion-textarea {
+    min-height: 80px;
+  }
+}
+
+// Messages d'erreur
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $danger-color;
+  font-size: 13px;
+  padding: 4px 12px;
+  margin-bottom: 8px;
+  
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+// Compteur de caractères
+.char-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  padding: 4px 12px 0;
+}
+
+// Barre de recherche
+ion-searchbar {
+  --background: white;
+  --border-radius: 8px;
+  --box-shadow: #{$card-shadow};
+  padding: 0 0 12px 0;
+}
+
+// Checkbox tout sélectionner
+.select-all-item {
+  --background: #e3f2fd;
+  --border-radius: 8px;
+  margin-bottom: 12px;
+  border: 2px solid $primary-color;
+  
+  ion-label {
+    margin-left: 8px;
+    color: $primary-color;
+  }
+}
+
+// Liste des employés
+.employees-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: white;
+  
+  // Scrollbar personnalisée
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $primary-color;
+    border-radius: 4px;
+    
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
+  }
+}
+
+.employee-item {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    --background: #f8f9fa;
+  }
+  
+  ion-checkbox {
+    margin-right: 12px;
+  }
+}
+
+.employee-info {
+  width: 100%;
+  
+  .employee-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    
+    ion-icon {
+      font-size: 24px;
+    }
+    
+    span {
+      font-weight: 600;
+      font-size: 15px;
+      color: #333;
+    }
+  }
+  
+  .employee-details {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    
+    ion-badge {
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  }
+}
+
+// Message aucun résultat
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+// Footer
+ion-footer {
+  ion-toolbar {
+    --background: white;
+    --border-width: 0;
+    padding: 12px 16px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 12px;
+  
+  ion-button {
+    flex: 1;
+    font-weight: 600;
+    height: 48px;
+    
+    ion-icon {
+      font-size: 20px;
+    }
+    
+    ion-spinner {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .modal-container {
+    padding: 12px;
+  }
+  
+  .employees-list {
+    max-height: 300px;
+  }
+  
+  .footer-buttons {
+    flex-direction: column;
+    
+    ion-button {
+      width: 100%;
+    }
+  }
+  
+  .employee-info {
+    .employee-name {
+      span {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-card,
+.employees-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+// Fix pour SweetAlert dans le modal
+::ng-deep {
+  .swal-ionic-container {
+    z-index: 99999 !important;
+  }
+}

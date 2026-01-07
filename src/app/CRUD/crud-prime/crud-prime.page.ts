@@ -29,6 +29,7 @@ export class CrudPrimePage implements OnInit {
    id: number;
   commentaire: '';
   origineTable: '';
+  montantPrime: number;
 
   constructor(private modalctrl: ModalController,
     private http: HttpClient,
@@ -45,6 +46,7 @@ export class CrudPrimePage implements OnInit {
       this.commentaire=this.employe.commentaire;
       this.origineTable=this.employe.origineTable;
       this.isUpdate = true;
+      this.montantPrime=0;
       // PrenomEmploye
       // NomEmploye
     }
@@ -52,9 +54,9 @@ export class CrudPrimePage implements OnInit {
 
   onSubmit(){
     if (this.point===''){
-      this.presentToast('Veillez mettre votre prénom SVP!!!!!!');
+      this.presentToast('Veillez préciser le nombre de point.');
     }else if(this.motif===''){
-      this.presentToast('Veillez mettre l\'adresse SVP!!!!');
+      this.presentToast('Veillez préciser le motif.');
     }/* else if (this.telephone===''){
       this.presentToast('Veillez mettre le numéro SVP!!!!');
     } */else{
@@ -64,15 +66,19 @@ export class CrudPrimePage implements OnInit {
         headers.append('Content-Type', 'application/json' );
         let txIdEmp= '';
         let txId= '';
+        let txMontantPrime='';
         if (this.employe){
           txIdEmp='&IdEmploye='+this.IDEmp ;
           txId='&ID='+this.ID ;
         }if(this.selected){
           txIdEmp='&IDEMPLOYE='+this.id;
         }
+        if(this.montantPrime && this.montantPrime>0){
+          txMontantPrime='&MONTANTPRIME='+this.montantPrime;
+        }
 
         const apiUrl=environment.endPoint+'performance_action.php?Action=ADD_PERFORMANCE&NBPOINT='+this.point+'&MOTIF='+this.motif+
-        '&commentaire='+this.commentaire+txIdEmp+txId+'&origineTable='+this.origineTable+'&Token='+environment.tokenUser;
+        '&commentaire='+this.commentaire+txIdEmp+txId+txMontantPrime+'&Token='+environment.tokenUser;
         // ---------------
         console.log(apiUrl);
         this.http.get(apiUrl).subscribe(async data =>{

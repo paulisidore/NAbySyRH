@@ -55,6 +55,7 @@ ion-header {
     flex-direction: column;
     gap: 8px;
     
+    .retenue-btn,
     .export-btn,
     .import-btn,
     .edit-btn,
@@ -72,6 +73,14 @@ ion-header {
       
       ion-icon {
         font-size: 20px;
+      }
+    }
+    
+    .retenue-btn {
+      --background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+      
+      &:hover:not([disabled]) {
+        --background: linear-gradient(135deg, #e68900 0%, #e64a19 100%);
       }
     }
     
@@ -93,7 +102,8 @@ ion-header {
     
     .validate-btn[disabled],
     .export-btn[disabled],
-    .import-btn[disabled] {
+    .import-btn[disabled],
+    .retenue-btn[disabled] {
       opacity: 0.5;
     }
     
@@ -105,7 +115,7 @@ ion-header {
     }
     
     @media (min-width: 1024px) {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 }
@@ -733,6 +743,48 @@ ion-popover {
     .swal-ionic-popup {
       width: 90% !important;
       max-width: none !important;
+    }
+  }
+}
+
+// ==========================================
+// STYLES POUR LE MODAL DE RETENUE
+// ==========================================
+::ng-deep {
+  .retenue-modal {
+    --height: 90%;
+    --width: 90%;
+    --max-width: 900px;
+    --border-radius: 16px;
+    --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .retenue-modal {
+      --width: 100%;
+      --height: 100%;
+      --border-radius: 0;
+    }
+  }
+}
+
+// ==========================================
+// STYLES POUR LE MODAL DE PRIME
+// ==========================================
+::ng-deep {
+  .prime-modal {
+    --height: 90%;
+    --width: 90%;
+    --max-width: 900px;
+    --border-radius: 16px;
+    --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .prime-modal {
+      --width: 100%;
+      --height: 100%;
+      --border-radius: 0;
     }
   }
 }

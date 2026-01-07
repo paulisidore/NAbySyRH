@@ -57,6 +57,28 @@
 
         <ion-col size="12" size-md="8">
           <!-- Actions principales -->
+           <ion-button
+              (click)="openPrimeModal()"
+              color="success"
+              expand="block"
+              class="prime-btn"
+              [disabled]="!listeEmploye || listeEmploye.length === 0"
+            >
+              <ion-icon slot="start" name="gift-outline"></ion-icon>
+              Ajouter Prime
+            </ion-button>
+            
+           <ion-button
+              (click)="openRetenueModal()"
+              color="warning"
+              expand="block"
+              class="retenue-btn"
+              [disabled]="!listeEmploye || listeEmploye.length === 0"
+            >
+              <ion-icon slot="start" name="remove-circle-outline"></ion-icon>
+              Ajouter Retenue
+          </ion-button>
+          
           <div class="action-buttons">
             <ion-button
               (click)="openExportMenu()"

@@ -1,0 +1,164 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Ajouter une Retenue sur Salaire</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="retenue-modal-content">
+  <div class="modal-container">
+    <!-- Section Formulaire -->
+    <ion-card class="form-card">
+      <ion-card-header>
+        <ion-card-title>Informations de la Retenue</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <form>
+          <!-- Montant -->
+          <ion-item lines="full" [class.item-has-error]="montantError">
+            <ion-label position="stacked">
+              Montant (XOF) <span class="required">*</span>
+            </ion-label>
+            <ion-input
+              type="number"
+              [(ngModel)]="montant"
+              name="montant"
+              placeholder="Ex: 50000"
+              min="0"
+              step="1000"
+              (ionChange)="montantError = ''"
+            ></ion-input>
+          </ion-item>
+          <div class="error-message" *ngIf="montantError">
+            <ion-icon name="alert-circle"></ion-icon>
+            {{ montantError }}
+          </div>
+
+          <!-- Motif -->
+          <ion-item lines="full" [class.item-has-error]="motifError">
+            <ion-label position="stacked">
+              Motif <span class="required">*</span>
+            </ion-label>
+            <ion-textarea
+              [(ngModel)]="motif"
+              name="motif"
+              placeholder="Ex: Absence non justifiée, Retard répété, Avance remboursement..."
+              rows="3"
+              maxlength="500"
+              (ionChange)="motifError = ''"
+            ></ion-textarea>
+          </ion-item>
+          <div class="error-message" *ngIf="motifError">
+            <ion-icon name="alert-circle"></ion-icon>
+            {{ motifError }}
+          </div>
+          <div class="char-counter">
+            {{ motif?.length || 0 }} / 500 caractères
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Section Sélection des Employés -->
+    <ion-card class="employees-card">
+      <ion-card-header>
+        <ion-card-title>
+          Sélection des Employés
+          <ion-badge color="primary" class="employee-count">
+            {{ employesSelectionnes.length }} / {{ listeEmployes.length }}
+          </ion-badge>
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Barre de recherche -->
+        <ion-searchbar
+          [(ngModel)]="searchTerm"
+          placeholder="Rechercher un employé..."
+          animated
+          debounce="300"
+        ></ion-searchbar>
+
+        <!-- Checkbox Tout sélectionner -->
+        <ion-item lines="full" class="select-all-item">
+          <ion-checkbox
+            slot="start"
+            [checked]="selectAll"
+            (ionChange)="onSelectAllChange($event)"
+          ></ion-checkbox>
+          <ion-label>
+            <strong>Tout sélectionner / Tout désélectionner</strong>
+          </ion-label>
+        </ion-item>
+
+        <!-- Liste des employés -->
+        <div class="employees-list">
+          <ion-item
+            *ngFor="let employe of employesFiltres"
+            lines="full"
+            class="employee-item"
+          >
+            <ion-checkbox
+              slot="start"
+              [checked]="isEmployeSelected(employe)"
+              (ionChange)="onEmployeSelect(employe, $event)"
+            ></ion-checkbox>
+            
+            <ion-label>
+              <div class="employee-info">
+                <div class="employee-name">
+                  <ion-icon name="person-circle-outline" color="medium"></ion-icon>
+                  <span>{{ employe.EMPLOYE?.PRENOM }} {{ employe.EMPLOYE?.NOM }}</span>
+                </div>
+                <div class="employee-details">
+                  <ion-badge color="light">ID: {{ employe.IDEMPLOYE }}</ion-badge>
+                  <ion-badge color="success">
+                    {{ employe.SALAIRE?.SALAIRE_NET | currency:'XOF':'symbol':'1.0-0' }}
+                  </ion-badge>
+                </div>
+              </div>
+            </ion-label>
+          </ion-item>
+
+          <!-- Message si aucun résultat -->
+          <div class="no-results" *ngIf="employesFiltres.length === 0">
+            <ion-icon name="search-outline" color="medium"></ion-icon>
+            <p>Aucun employé trouvé</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <div class="footer-buttons">
+      <ion-button
+        expand="block"
+        color="medium"
+        (click)="dismiss()"
+        [disabled]="isSubmitting"
+      >
+        <ion-icon slot="start" name="close-circle"></ion-icon>
+        Annuler
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+      >
+        <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!isSubmitting" slot="start" name="checkmark-circle"></ion-icon>
+        {{ isSubmitting ? 'Traitement...' : 'Ajouter la Retenue' }}
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

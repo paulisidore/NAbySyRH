@@ -1,3 +1,5 @@
+/* eslint-disable object-shorthand */
+/* eslint-disable @typescript-eslint/member-ordering */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable max-len */
 import { IKSSVTransactionSalaire, PaiementService } from './../../services/paiement.service';
@@ -28,6 +30,8 @@ import { firstValueFrom } from 'rxjs';
 import { IApiNotification } from 'src/app/services/apireponse-structure.service';
 import { CommonKssvServiceService, xLBoutique } from 'src/app/services/common-kssv-service.service';
 import { ExportImportService } from 'src/app/services/export-import.service';
+import { RetenueModalComponent } from '../retenue-modal/retenue-modal.component';
+import { PrimeModalComponent } from '../prime-modal/prime-modal.component';
 
 @Component({
   selector: 'app-paiement-salaire',
@@ -450,7 +454,7 @@ export class PaiementSalairePage implements OnInit {
         selected: emp.SALAIRE.SALAIRE_NET > 0, // Sélectionnable uniquement si salaire net > 0
         status: emp.SALAIRE.SALAIRE_NET <= 0 ? 'paiement effectué' : '', // Statut initial
         TxErreur: '', // Initialiser le champ d'erreur
-        noteModePaiement: '', // Initialiser la note de paiement individuelle
+        noteModePaiement: emp.SALAIRE.NOTESALAIRE? emp.SALAIRE.NOTESALAIRE : '', // Initialiser la note de paiement individuelle
         salaireIsEdited: false, // Indicateur de modification du salaire
       }));
 
@@ -851,5 +855,83 @@ export class PaiementSalairePage implements OnInit {
     } else {
       this.selectAllCheckBox = false;
     }
+  }
+
+  /**
+   * Ouvre le modal pour ajouter une retenue sur salaire
+   */
+  async openRetenueModal() {
+    const modal = await this.modalctrl.create({
+      component: RetenueModalComponent,
+      componentProps: {
+        listeEmployes: this.listeEmploye || [],
+        employesPreselectionnes: this.selectedEmployees || []
+      },
+      cssClass: 'retenue-modal',
+      backdropDismiss: false, // Empêche la fermeture au clic extérieur
+      showBackdrop: true
+    });
+
+    // Gérer le retour du modal
+    modal.onDidDismiss().then((result) => {
+      if (result.data && result.data.success) {
+        // La retenue a été ajoutée avec succès
+        console.log('Retenue ajoutée:', result.data);
+        
+        // Recharger la liste des employés pour avoir les nouveaux montants
+        this.loadEmploye();
+        
+        // Afficher un message de succès (optionnel)
+        this.toastController.create({
+          message: `Retenue de ${result.data.montant.toLocaleString('fr-FR')} XOF ajoutée pour ${result.data.employesSelectionnes.length} employé(s)`,
+          duration: 3000,
+          color: 'success',
+          icon: 'checkmark-circle'
+        }).then(toast => toast.present());
+      }
+    });
+
+    return await modal.present();
+  }
+
+  /**
+   * Ouvre le modal pour ajouter une prime
+   */
+  async openPrimeModal() {
+    const modal = await this.modalctrl.create({
+      component: PrimeModalComponent,
+      componentProps: {
+        listeEmployes: this.listeEmploye || [],
+        employesPreselectionnes: this.selectedEmployees || []
+      },
+      cssClass: 'prime-modal',
+      backdropDismiss: false, // Empêche la fermeture au clic extérieur
+      showBackdrop: true
+    });
+
+    // Gérer le retour du modal
+    modal.onDidDismiss().then((result) => {
+      if (result.data && result.data.success) {
+        // La prime a été ajoutée avec succès
+        console.log('Prime ajoutée:', result.data);
+        
+        // Recharger la liste des employés pour avoir les nouveaux montants
+        this.loadEmploye();
+        
+        // Afficher un message de succès (optionnel)
+        const message = result.data.errorCount > 0 
+          ? `${result.data.successCount} prime(s) ajoutée(s), ${result.data.errorCount} erreur(s)`
+          : `${result.data.successCount} prime(s) ajoutée(s) avec succès`;
+        
+        this.toastController.create({
+          message: message,
+          duration: 3000,
+          color: result.data.errorCount > 0 ? 'warning' : 'success',
+          icon: 'gift'
+        }).then(toast => toast.present());
+      }
+    });
+
+    return await modal.present();
   }
 }
